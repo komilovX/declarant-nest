@@ -1,0 +1,142 @@
+<template>
+  <div>
+    <el-row :gutter="20" class="p1">
+      <el-col :span="24" :md="16" :sm="24">
+        <document-table-header
+          header-text="Клиенты"
+          @on-click="dialogVisible = true"
+        />
+        <el-alert
+          v-if="error"
+          class="mb1"
+          title="Пожалуйста, заполните все поля формы"
+          type="error"
+          center
+          show-icon
+        />
+        <el-table
+          border
+          :data="clients"
+          tooltip-effect="light"
+          style="width: 100%"
+          size="small"
+        >
+          <app-table-column width="130" label="Дата">
+            <template #default="{ index, row: { date, changed } }">
+              <el-date-picker
+                v-if="changed"
+                v-model="clients[index].date"
+                size="mini"
+                style="width: 95%"
+                type="date"
+                placeholder="Дата"
+              />
+              <span v-else>{{ date | dateFormatter }}</span>
+            </template>
+          </app-table-column>
+          <app-table-column label="Клиент фирма">
+            <template #default="{ index, row }">
+              <app-input-row
+                :row="row"
+                :value="clients[index].name"
+                @on-change="clients[index].name = $event"
+              />
+            </template>
+          </app-table-column>
+          <app-table-column label="Инфо">
+            <template #default="{ index, row }">
+              <app-input-row
+                :row="row"
+                :value="clients[index].info"
+                @on-change="clients[index].info = $event"
+              />
+            </template>
+          </app-table-column>
+          <app-table-column label="Действия">
+            <template #default="{ row: { id, changed }, index }">
+              <app-table-actions
+                :changed="changed"
+                @on-changed="clients[index].changed = true"
+                @on-cancel="clients[index].changed = false"
+                @on-delete="deleteClient(id)"
+                @on-save="updateClient(id, index)"
+              />
+            </template>
+          </app-table-column>
+        </el-table>
+        <ClientDialog
+          :visible="dialogVisible"
+          :on-close="() => (dialogVisible = false)"
+        />
+      </el-col>
+    </el-row>
+  </div>
+</template>
+<script>
+import ClientDialog from '@/components/DialogComponents/CreateClientDialog.vue'
+import AppTableActions from '~/components/AppComponents/AppTableActions.vue'
+import DocumentTableHeader from '~/components/AppComponents/DocumentTableHeader.vue'
+import AppTableColumn from '~/components/AppComponents/AppTableColumn.vue'
+import { dataStore } from '~/store'
+import AppInputRow from '~/components/AppComponents/AppInputRow.vue'
+
+export default {
+  components: {
+    ClientDialog,
+    AppTableActions,
+    DocumentTableHeader,
+    AppTableColumn,
+    AppInputRow,
+  },
+  data() {
+    return {
+      dataStore,
+      dialogVisible: false,
+      error: false,
+    }
+  },
+  async fetch() {
+    try {
+      await dataStore.fetchClients()
+    } catch (error) {}
+  },
+  computed: {
+    clients() {
+      return dataStore.clients.map((c) => ({ ...c, changed: false }))
+    },
+  },
+  methods: {
+    async updateClient(id, index) {
+      try {
+        const client = this.clients[index]
+        if (!client.date || !client.name) {
+          this.error = true
+          return
+        }
+        await this.dataStore.updateClient({ data: client, id })
+        this.clients[index].changed = false
+        this.$message.success('Oбнавлена')
+      } catch (e) {
+        console.log(e)
+      }
+    },
+    deleteClient(id) {
+      const text = 'Уверены, что хотите удалить этот клиент?'
+      this.$confirm(text, 'Подтверждение', {
+        confirmButtonText: 'Да',
+        cancelButtonText: 'Отменить',
+        type: 'warning',
+      })
+        .then(async () => {
+          try {
+            await this.dataStore.removeClient(id)
+            this.$message.success('Клиент удалена')
+          } catch (e) {
+            console.log(e)
+          }
+        })
+        .catch(() => {})
+    },
+  },
+}
+</script>

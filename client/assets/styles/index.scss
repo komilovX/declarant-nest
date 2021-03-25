@@ -1,0 +1,31 @@
+@import './tailwand';
+@import './ag-grid.scss';
+.active-class {
+  color: rgb(37, 99, 235);
+  i {
+    color: rgb(37, 99, 235);
+  }
+}
+.navbar-icon {
+  font-size: 22px;
+}
+.el-table {
+  td {
+    padding: 2px 0;
+  }
+  td .cell {
+    font-size: 16px!important;
+  }
+}
+.custom-tree-node {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 250px;
+}
+.el-collapse-item__header {
+  padding: 5px 10px;
+  color: white;
+  background: #374151;
+}

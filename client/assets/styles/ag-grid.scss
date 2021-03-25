@@ -1,0 +1,288 @@
+$spacer: 2.2rem;
+$spacer-sm: ($spacer / 2);
+$spacer-lg: ($spacer * 2);
+
+
+$primary: #7367F0;
+$success: #28C76F;
+$danger: #EA5455;
+$warning: #FF9F43;
+$dark: #1E1E1E;
+$grey: #b8c2cc;
+$grey-light: #dae1e7;
+$white: #fff;
+$black: #22292f;
+
+
+$font-family-sans-serif:  "Montserrat", Helvetica, Arial, sans-serif !default;
+$font-family-serif:       Georgia, "Times New Roman", Times, serif !default;
+
+//** Default monospace fonts for `<code>`, `<kbd>`, and `<pre>`.
+$font-family-monospace:   Menlo, Monaco, Consolas, "Courier New", monospace !default;
+$font-family-base:        $font-family-sans-serif !default;
+
+$font-size-base:          14px !default;
+$font-size-large:         ceil(($font-size-base * 1.25)) !default;
+$font-size-small:         ceil(($font-size-base * 0.85)) !default;
+
+$h1-font-size:                $font-size-base * 2;
+$h2-font-size:                $font-size-base * 1.74;
+$h3-font-size:                $font-size-base * 1.51;
+$h4-font-size:                $font-size-base * 1.32;
+$h5-font-size:                $font-size-base * 1.14;
+$h6-font-size:                $font-size-base;
+
+
+$line-height-base:        1.625rem !default;
+
+$headings-font-family:    inherit !default;
+$headings-font-weight:    500 !default;
+$headings-line-height:    1.2 !default;
+$headings-color:          #2c2c2c;
+$headings-margin-bottom:      ($spacer / 2) !default;
+
+$font-weight-light:           300;
+$font-weight-normal:          400;
+$font-weight-bold:            700;
+
+$font-weight-base:            $font-weight-normal;
+$line-height-base:            1.45;
+
+$content-color: #626262;
+$theme-background: #f8f8f8;
+
+
+/*========================================================
+        TYPOGRAPHY
+=========================================================*/
+
+$reduced-sidebar-width: 80px;
+
+
+/*========================================================
+        DARK THEME
+=========================================================*/
+
+$sidebar-dark-bg: #10163a;
+$content-dark-bg: #262c49;
+$dark-card-color: #10163a;
+$table-dark-stripe: #212744;
+$table-light-stripe: #262c49;
+$grid-dark-color: #343661;
+
+$theme-light-dark-bg: #262c49;
+$theme-dark-bg: #10163a;
+$theme-dark-secondary-bg: #171e49;
+$theme-dark-text-color: #c2c6dc;
+$theme-dark-heading-color: #ebeefd;
+// $theme-dark-heading-color: #C9CAD2;
+$theme-dark-border-color: #414561;
+$theme-dark-shadow-color: #0C112E;
+
+
+$icons-path: "~ag-grid-community/src/styles/ag-theme-material/icons/" !default;
+
+$font-family: inherit;
+$font-size: inherit;
+$font-weight: inherit;
+$secondary-font-family: inherit;
+$secondary-font-size: inherit;
+$secondary-font-weight: 600;
+$primary-color: #7367F0;
+$ag-suppress-legacy-var-import: true;
+@import "~ag-grid-community/src/styles/ag-grid.scss";
+@import "~ag-grid-community/src/styles/ag-theme-material/sass/legacy/ag-theme-material-v22-compat.scss";
+
+.ag-grid-table {
+
+  color: inherit !important;
+
+  height: calc(var(--vh, 1vh) * 100 - 30rem);
+  @media screen and (max-height: 800px) {
+    height: 620px;
+  }
+
+  .ag-header-cell {
+    .ag-cell-label-container {
+      .ag-header-icon.ag-filter-icon {
+        display: none;
+      }
+    }
+  }
+
+  // style select of column header filter
+  .ag-filter-select {
+    padding: 0.3rem;
+    background: transparent;
+    border-radius: 5px;
+    border: 1px solid rgba(0, 0, 0, .2);
+  }
+
+  // style input of column header filter input
+  .ag-filter-filter {
+    margin-right: 10px;
+    margin-left: 10px;
+    padding-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    height: 25px !important;
+    margin-top: 10px;
+    margin-bottom: 14px !important;
+  }
+
+  // remove extra padding of input in inline edit
+  .ag-input-text-wrapper {
+    input {
+      padding-bottom: 0 !important;
+    }
+  }
+
+  // Make input border bottom visible
+  .ag-floating-filter-body {
+    height: unset;
+  }
+
+  .ag-cell-inline-editing {
+    height: 62px !important;
+  }
+
+  .ag-cell-inline-editting,
+  .ag-popup-editor {
+    padding-bottom: 12px;
+  }
+
+  .ag-grid-table-actions-right {
+    @media screen and (max-width: 614px) {
+      flex-grow: 1;
+    }
+  }
+
+  .ag-grid-table-actions-left {
+    @media screen and (max-width: 614px) and (min-width: 443px) {
+      display: flex;
+      flex-grow: 1;
+      justify-content: flex-end;
+    }
+  }
+
+  // remove horizontal scroolbar from pinned columns
+  .ag-horizontal-left-spacer, .ag-horizontal-right-spacer {
+    overflow-x: auto;
+  }
+
+  .ag-icon-checkbox-checked,
+  .ag-icon-checkbox-indeterminate {
+    font-size: 22px;
+    color: rgba(var(--vs-primary),1) !important;
+  }
+
+  .ag-icon-checkbox-unchecked {
+    color: $grey !important;
+    font-size: 22px;
+  }
+
+    ::-webkit-scrollbar {
+     width: 10px;
+     height: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+     background: $grey-light;
+     border-radius: 20px;
+    }
+
+    ::-webkit-scrollbar-track {
+     background: $theme-background;
+     border-radius: 20px;
+    }
+}
+
+// Can not use vuexy admin variables
+// agGrid vars and imported vars may conflict
+.theme-dark {
+  .ag-grid-table {
+    &.ag-theme-material {
+      background: transparent;
+      color: $theme-dark-text-color;
+
+      .ag-header {
+        background: transparent;
+        color: $white;
+        border-bottom-color: $theme-dark-border-color;
+      }
+
+      .ag-cell-last-left-pinned {
+        border-right-color: $theme-dark-border-color !important;
+      }
+
+      .ag-floating-filter-input {
+        color: $theme-dark-text-color;
+        border-bottom-color: $theme-dark-border-color;
+      }
+
+      .ag-row-hover,
+      .ag-header-cell:hover {
+        background-color: $theme-light-dark-bg;
+      }
+
+      .ag-row-selected {
+        background: $theme-light-dark-bg;
+      }
+
+      .ag-row,
+      .ag-header-cell,
+      .ag-header-group-cell,
+      .ag-row,
+      .ag-pinned-left-header,
+      .ag-horizontal-left-spacer,
+      .ag-horizontal-right-spacer {
+        border-color: $theme-dark-border-color;
+      }
+    }
+
+    .ag-icon-checkbox-unchecked,
+    .ag-icon-filter,
+    .ag-icon-asc,
+    .ag-icon-desc {
+      color: $theme-dark-text-color !important;
+    }
+
+    .ag-filter-body-wrapper {
+      background-color: $theme-light-dark-bg;
+    }
+
+    .ag-filter-select {
+      border-color: $theme-dark-border-color;
+      color: $theme-dark-text-color;
+    }
+
+    option {
+      background-color: $theme-dark-bg;
+    }
+
+    ::-webkit-scrollbar {
+     width: 10px;
+     height: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+     background: $primary;
+     border-radius: 20px;
+    }
+
+    ::-webkit-scrollbar-track {
+     background: $theme-light-dark-bg;
+     border-radius: 20px;
+    }
+  }
+}
+
+// Custom Fixes
+.ag-grid-cell-chip {
+  top: 50%;
+  transform: translateY(-50%);
+  line-height: 1;
+}
+
+.ag-theme-material .ag-cell {
+  line-height: 30px !important;
+}
