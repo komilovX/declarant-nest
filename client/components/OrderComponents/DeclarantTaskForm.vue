@@ -7,17 +7,17 @@
   >
     <el-row :gutter="15">
       <el-col :span="24" :md="3" :sm="18">
-        <el-form-item prop="number">
+        <el-form-item prop="documentTypeId">
           <el-select
-            v-model="declarantForm.number"
+            v-model="declarantForm.documentTypeId"
             size="small"
             filterable
             class="width90"
             placeholder="№"
-            @change="(val) => onSelectChange(val, 'declarantForm')"
+            @change="setDocumentType"
           >
             <el-option
-              v-for="c in declarantDocumentTypes"
+              v-for="c in documents"
               :key="c.id"
               :label="c.number"
               :value="c.id"
@@ -33,10 +33,10 @@
             filterable
             class="width90"
             placeholder="Название"
-            @change="(val) => onSelectChange(val, 'declarantForm')"
+            @change="setDocumentType"
           >
             <el-option
-              v-for="c in declarantDocumentTypes"
+              v-for="c in documents"
               :key="c.id"
               :label="c.name"
               :value="c.id"
@@ -61,9 +61,19 @@
           </el-select>
         </el-form-item>
       </el-col>
+      <el-col :span="12" :md="4" :sm="12">
+        <el-form-item prop="expire">
+          <el-date-picker
+            v-model="declarantForm.expire"
+            size="small"
+            style="max-width: 100%"
+            placeholder="Срок"
+          />
+        </el-form-item>
+      </el-col>
       <el-col :span="24" :md="4" :sm="18" class="mb1">
         <el-form-item id="submit-button">
-          <app-save-button
+          <app-add-button
             :loading="documentsStore.loading"
             @on-click="giveTask('declarantForm')"
           />
@@ -74,10 +84,22 @@
 </template>
 
 <script>
+import AppAddButton from '../AppComponents/AppAddButton.vue'
 import { documentTypeStore, userStore, documentsStore } from '~/store'
 import { DocumenTypes } from '~/utils/enums'
 
 export default {
+  components: { AppAddButton },
+  props: {
+    orderId: {
+      type: Number,
+      required: true,
+    },
+    documents: {
+      type: Array,
+      default: () => [],
+    },
+  },
   data() {
     return {
       userStore,
@@ -85,16 +107,25 @@ export default {
       declarantForm: {
         documentTypeId: null,
         declarantId: null,
+        expire: null,
+        type: null,
       },
       rules: {
-        number: [
+        documentTypeId: [
           {
             required: true,
             message: 'Пожалуйста, введите название деятельности',
             trigger: 'blur',
           },
         ],
-        name: [
+        declarantId: [
+          {
+            required: true,
+            message: 'Пожалуйста, введите название деятельности',
+            trigger: 'blur',
+          },
+        ],
+        expire: [
           {
             required: true,
             message: 'Пожалуйста, введите название деятельности',
@@ -111,6 +142,33 @@ export default {
           types.includes(DocumenTypes.DECLARANT) ||
           types.includes(DocumenTypes.SERVICE)
       )
+    },
+  },
+  methods: {
+    setDocumentType(val) {
+      const document = documentTypeStore.documentTypes.find((d) => d.id == val)
+      if (document) {
+        this.declarantForm.type = document.types[0]
+      }
+    },
+    giveTask() {
+      this.$refs.declarantForm.validate(async (valid) => {
+        if (valid) {
+          try {
+            const formData = {
+              ...this.declarantForm,
+              orderId: this.orderId,
+            }
+            const document = await documentsStore.giveTask(formData)
+            this.$emit('documentAdded', document)
+            this.$message.success('Документ успешно обновлен')
+            this.$refs.declarantForm.resetFields()
+          } catch (error) {
+            this.loading = false
+            console.log(error)
+          }
+        }
+      })
     },
   },
 }

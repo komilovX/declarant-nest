@@ -46,7 +46,7 @@
           label="Должность"
         >
           <template slot-scope="{ row: { role } }">
-            <el-tag :key="label" type="primary" effect="plain" size="small">
+            <el-tag type="primary" effect="plain" size="small">
               {{ role.name }}
             </el-tag>
           </template>

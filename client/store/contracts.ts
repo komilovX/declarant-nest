@@ -56,6 +56,24 @@ class Contracts extends VuexModule {
   }
 
   @Action({ rawError: true })
+  async fetchContractsForOrder({
+    clientId,
+    shipperId,
+  }: {
+    clientId: number
+    shipperId: number
+  }) {
+    try {
+      return await $axios.$get(
+        `/contract/orders?clientId=${clientId}&shipperId=${shipperId}`
+      )
+    } catch (error) {
+      errorStore.setError(error)
+      throw error
+    }
+  }
+
+  @Action({ rawError: true })
   async addContract(data: any) {
     try {
       this.setLoading(true)

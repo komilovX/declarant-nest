@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-row :gutter="20" class="p1">
-      <el-col :span="24" :md="16" :sm="24">
+      <el-col :span="24" :md="22" :sm="24">
         <document-table-header
           header-text="Клиенты"
           @on-click="dialogVisible = true"
@@ -50,6 +50,41 @@
                 :value="clients[index].info"
                 @on-change="clients[index].info = $event"
               />
+            </template>
+          </app-table-column>
+          <app-table-column label="Владелец">
+            <template #default="{ row: { directors, changed, id }, index }">
+              <div v-if="changed">
+                <div
+                  v-for="(d, ind) in directors"
+                  :key="ind"
+                  class="flex items-center"
+                >
+                  <el-input
+                    :value="directors[ind].name"
+                    placeholder="Название"
+                    class="mb-1 mr-2"
+                    type="text"
+                    size="mini"
+                    @input="(value) => editClientDirector(id, ind, value)"
+                  />
+                  <i
+                    v-if="ind === 0"
+                    class="el-icon-circle-plus fs-icon text-lg cursor-pointer text-blue-500"
+                    @click="addDirector(id, index)"
+                  />
+                  <i
+                    v-else
+                    class="el-icon-close fs-icon text-lg cursor-pointer text-gray-500"
+                    @click="deleteDirector(id, ind)"
+                  />
+                </div>
+              </div>
+              <div v-else>
+                <div v-for="(director, ind) in directors" :key="ind">
+                  {{ director.name }}
+                </div>
+              </div>
             </template>
           </app-table-column>
           <app-table-column label="Действия">
@@ -136,6 +171,17 @@ export default {
           }
         })
         .catch(() => {})
+    },
+    addDirector(id, index) {
+      dataStore.addClientDirector(id)
+      this.clients[index].changed = true
+    },
+    deleteDirector(id, index) {
+      dataStore.deleteClientDirector({ id, index })
+      this.clients[index].changed = true
+    },
+    editClientDirector(id, index, value) {
+      dataStore.editClientDirector({ id, index, value })
     },
   },
 }

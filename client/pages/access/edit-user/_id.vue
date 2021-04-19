@@ -5,7 +5,7 @@
         class="el-icon-arrow-left mr-4 text-blue-500 text-2xl font-xl cursor-pointer"
         @click="$router.back()"
       />
-      <h2 class="text-lg font-medium">Добавление пользователя</h2>
+      <h2 class="text-lg font-medium">Редактирование пользователя</h2>
     </div>
     <div>
       <el-row>
@@ -32,6 +32,16 @@
             <el-form-item label="Логин" prop="login">
               <el-input v-model="employerForm.login" size="small" type="text" />
             </el-form-item>
+            <el-form-item label="Роль" prop="role" class="mb2">
+              <el-select v-model="employerForm.role" size="small">
+                <el-option
+                  v-for="s in rolesStore.roles"
+                  :key="s.role"
+                  :label="s.name"
+                  :value="s.role"
+                />
+              </el-select>
+            </el-form-item>
             <el-form-item label="Пароль" prop="password">
               <el-input
                 v-model="employerForm.password"
@@ -39,24 +49,14 @@
                 type="password"
               />
             </el-form-item>
-            <el-form-item label="Роль" prop="role" class="mb2">
-              <el-select v-model="employerForm.role" size="small">
-                <el-option
-                  v-for="s in roles"
-                  :key="s.role"
-                  :label="s.label"
-                  :value="s.role"
-                />
-              </el-select>
-            </el-form-item>
             <el-form-item id="submit-button">
               <el-button
                 type="success"
-                :loading="loading"
+                :loading="userStore.loading"
                 size="small"
                 @click="submitForm('employerForm')"
               >
-                Сохранить
+                Обновить
               </el-button>
             </el-form-item>
           </el-form>
@@ -66,9 +66,34 @@
   </div>
 </template>
 <script>
-import accessForm from '@/mixins/accessForm'
+import { rolesStore, userStore } from '~/store'
+import { mapRulesByValue } from '~/utils/form-rules'
 export default {
-  mixins: [accessForm],
+  middleware: ['admin-auth'],
+  data() {
+    return {
+      rolesStore,
+      userStore,
+      employerForm: {
+        name: '',
+        login: '',
+        password: '',
+        comment: '',
+        role: '',
+        username: '',
+      },
+      rules: mapRulesByValue(['name', 'login', 'username', 'role']),
+    }
+  },
+  async fetch() {
+    try {
+      if (!rolesStore.roles.length) {
+        await rolesStore.fetchRoles()
+      }
+      await userStore.findUserById(+this.$route.params.id)
+      this.setUser()
+    } catch (error) {}
+  },
   methods: {
     submitForm(formName) {
       this.$refs[formName].validate(async (valid) => {
@@ -76,24 +101,32 @@ export default {
           const formData = {
             name: this.employerForm.name,
             login: this.employerForm.login,
-            password: this.employerForm.password,
             role: this.employerForm.role,
             username: this.employerForm.username,
           }
-          this.loading = true
+          if (this.employerForm.password) {
+            formData.password = this.employerForm.password
+          }
           try {
-            await this.$store.dispatch('auth/create', formData)
-            this.loading = false
+            await this.userStore.editUser({ id: userStore.user.id, formData })
             this.$message.success('Сотрудник успешно обновлен')
-            this.$router.push('/access')
+            this.$router.push('/access/users')
           } catch (e) {
-            this.loading = false
             console.log(e)
           }
         } else {
           return false
         }
       })
+    },
+    setUser() {
+      if (userStore.user) {
+        const { name, username, login, role } = userStore.user
+        this.employerForm.name = name
+        this.employerForm.username = username
+        this.employerForm.login = login
+        this.employerForm.role = role?.role
+      }
     },
   },
 }

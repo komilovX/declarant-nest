@@ -282,7 +282,6 @@ $ag-suppress-legacy-var-import: true;
   transform: translateY(-50%);
   line-height: 1;
 }
-
-.ag-theme-material .ag-cell {
-  line-height: 30px !important;
+.ag-header-cell-label {
+  justify-content: center;
 }

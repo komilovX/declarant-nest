@@ -58,10 +58,10 @@
                     size="mini"
                   >
                     <el-option
-                      v-for="s in ['$', 'uzs', 'перечисление']"
-                      :key="s"
-                      :label="s"
-                      :value="s"
+                      v-for="s in currencyList"
+                      :key="s.type"
+                      :label="s.type"
+                      :value="s.value"
                     />
                   </el-select>
                   <el-button
@@ -114,8 +114,8 @@
           label-width="160px"
           label-position="top"
         >
-          <el-col :span="24" :md="20">
-            <el-col :span="12" :md="5" :sm="12">
+          <el-col :span="24" :md="24">
+            <el-col :span="12" :md="4" :sm="12">
               <el-form-item label="Дата" prop="date">
                 <el-date-picker
                   v-model="ordersForm.date"
@@ -126,7 +126,7 @@
                 />
               </el-form-item>
             </el-col>
-            <el-col :span="12" :md="5" :sm="12">
+            <el-col :span="12" :md="4" :sm="12">
               <el-form-item label="Пост номер" prop="post_number">
                 <el-input
                   v-model="ordersForm.post_number"
@@ -154,6 +154,7 @@
                     size="small"
                     style="width: 100%; flex-grow: 1"
                     placeholder="Клиент фирма"
+                    @change="onClientSelectChange"
                   >
                     <el-option
                       v-for="(c, index) in dataStore.clients"
@@ -179,6 +180,24 @@
                     @click="clientDialogVisible = true"
                   />
                 </div>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12" :md="4" :sm="12">
+              <el-form-item label="Клиент владелец" prop="clientDirectorId">
+                <el-select
+                  v-model="ordersForm.clientDirectorId"
+                  filterable
+                  size="small"
+                  style="width: 100%; flex-grow: 1"
+                  placeholder="Клиент владелец"
+                >
+                  <el-option
+                    v-for="(c, index) in clientDirectors"
+                    :key="index"
+                    :label="c.name"
+                    :value="c.id"
+                  />
+                </el-select>
               </el-form-item>
             </el-col>
           </el-col>
@@ -325,22 +344,41 @@
 import { mapRulesByValue } from '@/utils/form-rules.js'
 import ShipperDialog from '@/components/DialogComponents/ShipperDialog.vue'
 import CreateClientDialog from '~/components/DialogComponents/CreateClientDialog.vue'
-import { dataStore, documentTypeStore, userStore, ordersStore } from '~/store'
+import {
+  dataStore,
+  documentTypeStore,
+  userStore,
+  ordersStore,
+  authStore,
+} from '~/store'
 import ProductDialog from '~/components/DialogComponents/ProductDialog.vue'
+import { currencyList } from '~/utils/data'
 
 export default {
   components: { ShipperDialog, CreateClientDialog, ProductDialog },
   middleware: ['admin-auth'],
+  validate() {
+    const pages = authStore.user?.role.pages
+    if (pages) {
+      const page = pages.find((p) => p.value === 'orders')
+      if (page && page.create) {
+        return true
+      }
+      return false
+    }
+    return false
+  },
   data: () => ({
     dataStore,
     documentTypeStore,
     userStore,
     ordersStore,
-    currencyList: ['$', 'сум', '€'],
+    currencyList,
     visibleDialog: false,
     clientDialogVisible: false,
     productDialogVisible: false,
     shipperDialogVisible: false,
+    clientDirectors: [],
     filteredDocuments: [],
     multipleSelection: [],
     fileList: [],
@@ -349,6 +387,7 @@ export default {
       date_income: new Date(),
       container: '',
       clientId: '',
+      clientDirectorId: '',
       shipperId: '',
       productId: '',
       post_number: '',
@@ -359,6 +398,7 @@ export default {
       'container',
       'productId',
       'clientId',
+      'clientDirectorId',
       'declarantId',
       'post_number',
       'shipperId',
@@ -435,7 +475,6 @@ export default {
                 fd.append('files', d.raw, d.name)
               }
             })
-            console.log('this.fileList', this.fileList)
             await this.ordersStore.createOrder(fd)
             this.$message.success('Заявки успешна добавлена')
             this.$router.back()
@@ -490,6 +529,10 @@ export default {
       } else {
         this.$message.info('No data')
       }
+    },
+    onClientSelectChange(clientId) {
+      const client = dataStore.clients.find((c) => c.id === clientId)
+      if (clientId) this.clientDirectors = client.directors
     },
   },
 }

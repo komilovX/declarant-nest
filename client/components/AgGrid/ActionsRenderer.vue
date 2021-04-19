@@ -32,6 +32,7 @@
     </el-badge>
     <el-button
       v-if="params.showDelete"
+      v-role:delete="params.pageRoles"
       type="danger"
       size="mini"
       icon="el-icon-delete"
@@ -52,8 +53,7 @@ export default Vue.extend({
   },
   methods: {
     viewClicked() {
-      console.log(`this.params.data`, this.params.node.data)
-      this.params.viewClicked(this.params.node.data.id)
+      this.params.viewClicked(this.params.node.data)
     },
     editClicked() {
       this.params.editClicked()

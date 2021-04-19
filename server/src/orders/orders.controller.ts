@@ -10,7 +10,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common'
 import { OrdersService } from './orders.service'
-import { CreateOrderDto, FindOrderGridDto, UpdateOrderDto } from './order.dto'
+import {
+  CreateOrderDto,
+  FindOrderGridDto,
+  OrderPriceDto,
+  UpdateOrderDefaultItems,
+  UpdateOrderDto,
+} from './order.dto'
 import { FileFieldsInterceptor } from '@nestjs/platform-express'
 import { diskStorage } from 'multer'
 import { editFileName } from 'src/utils/file-uploading.utils'
@@ -64,13 +70,37 @@ export class OrdersController {
     return this.ordersService.updateOrder(id, updateOrderDto)
   }
 
+  @Put('/items/:id')
+  updateOrderDefaultItems(
+    @Param('id') id: number,
+    @Body() updateOrderDefaultItems: UpdateOrderDefaultItems,
+  ) {
+    return this.ordersService.updateSecondaryItems(id, updateOrderDefaultItems)
+  }
+
+  @Put('/orderPrice/:id')
+  updateOrderPrice(
+    @Param('id') id: number,
+    @Body() orderPriceDto: OrderPriceDto,
+  ) {
+    return this.ordersService.updateOrderPrice(id, orderPriceDto)
+  }
+
   @Get('/:id')
   findOrderById(@Param('id') id: number) {
     return this.ordersService.findOrderById(id)
   }
 
   @Get('/detail/:id')
-  findOrderByIdWithDetails(@Param('id') id: number) {
-    return this.ordersService.findOrderByIdWithDetails(id)
+  findOrderByIdWithDetails(
+    @Param('id') id: number,
+    @Query('declarant') declarant: any,
+  ) {
+    return this.ordersService.findOrderByIdWithDetails(id, declarant)
+  }
+
+  @Get('/document/:id')
+  findOrderByUserDocument(@Param('id') id: number, @GetUser() user: User) {
+    return this.ordersService.findOrderByUserDocument(id, user)
   }
 }

@@ -57,6 +57,7 @@
             <div class="flex">
               <el-input
                 v-model="incomingForm.price"
+                clearable
                 placeholder="Цена"
                 class="mr-2"
                 size="small"
@@ -65,10 +66,10 @@
               />
               <el-select v-model="incomingForm.currency" size="small">
                 <el-option
-                  v-for="s in ['$', 'uzs', 'перечисление']"
-                  :key="s"
-                  :label="s"
-                  :value="s"
+                  v-for="s in currencyList"
+                  :key="s.value"
+                  :label="s.type"
+                  :value="s.value"
                 />
               </el-select>
             </div>
@@ -110,6 +111,8 @@ import { mapRulesByValue } from '@/utils/form-rules.js'
 import AppAddButton from '../AppComponents/AppAddButton.vue'
 import { documentsStore } from '~/store'
 import { DocumenTypes } from '~/utils/enums'
+import { currencyList } from '~/utils/data'
+
 export default {
   components: { AppAddButton },
   props: {
@@ -132,6 +135,7 @@ export default {
   },
   data() {
     return {
+      currencyList,
       loading: false,
       fileList: [],
       incomingForm: {
@@ -151,18 +155,22 @@ export default {
             const { documentTypeId, price, order, currency } = this[formName]
             const fd = new FormData()
             fd.append('documentTypeId', documentTypeId)
-            fd.append('price', price)
             fd.append('orderId', this.order_id)
             fd.append('number', order)
             fd.append('type', DocumenTypes.INCOMING)
-            fd.append('currency', currency)
+            if (price) {
+              fd.append('price', price)
+              fd.append('currency', currency)
+            }
             this.fileList.forEach((file) =>
               fd.append('files', file.raw, file.name)
             )
             const document = await documentsStore.createDocument(fd)
-            document.needPrice = false
+            document.price = document.price
+              ? document.price
+              : [{ price: '', currency: '' }]
             this.$emit('documentAdded', document)
-            this.$message.success('Документ успешно обновлен')
+            this.$message.success('Документ успешно добовлен')
             this.$refs.incomingForm.resetFields()
             this.$refs.decoratedUpload.clearFiles()
           } catch (error) {

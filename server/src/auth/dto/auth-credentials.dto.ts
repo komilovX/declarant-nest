@@ -1,5 +1,4 @@
-import { IsIn, IsString, Matches, MaxLength, MinLength } from 'class-validator'
-import { UserRoles } from 'src/utils/lib/types'
+import { IsString, Matches, MaxLength, MinLength } from 'class-validator'
 
 export class SignUpCredentialsDto {
   @IsString()
@@ -22,7 +21,6 @@ export class SignUpCredentialsDto {
   password: string
 
   @IsString()
-  @IsIn([UserRoles.ADMIN, UserRoles.MANAGER, UserRoles.DECLARANT])
   role: string
 }
 

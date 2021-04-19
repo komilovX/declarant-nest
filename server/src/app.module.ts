@@ -14,7 +14,8 @@ import { ContractModule } from './contract/contract.module'
 import { MulterModule } from '@nestjs/platform-express'
 import { imageFileFilter } from './utils/file-uploading.utils'
 import { AppController } from './app.controller'
-
+import { NotificationsModule } from './notifications/notifications.module'
+import { StatisticsModule } from './statistics/statistics.module'
 @Module({
   imports: [
     ConfigModule.forRoot(configOptions),
@@ -40,6 +41,8 @@ import { AppController } from './app.controller'
     RolesModule,
     DocumentTypeModule,
     ContractModule,
+    NotificationsModule,
+    StatisticsModule,
   ],
   controllers: [AppController],
 })

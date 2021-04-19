@@ -9,9 +9,10 @@
 import DataGrid from '~/components/DataGrid'
 import ActionRenderer from '~/components/AgGrid/ActionsRenderer'
 import OrderStatus from '~/components/AgGrid/OrderStatus'
-import { authStore } from '~/store'
+import { authStore, dataStore, userStore } from '~/store'
 import { statuses } from '~/utils/data'
 import AppHeader from '~/components/AppComponents/AppHeader.vue'
+import { fetchOrderFilters } from '~/utils/fetch-service'
 
 export default {
   components: { DataGrid, AppHeader },
@@ -20,10 +21,13 @@ export default {
     return {
       order_id: 0,
       newDeclarant: '',
-      isChatOpen: false,
-      messages: [],
-      participants: [],
-      chatLoading: false,
+    }
+  },
+  async fetch({ error }) {
+    try {
+      await fetchOrderFilters()
+    } catch (err) {
+      error(err)
     }
   },
   computed: {
@@ -50,31 +54,91 @@ export default {
         {
           headerName: 'Создатель',
           field: 'user',
+          width: 200,
+          sortable: false,
+          noSearch: true,
+          suppressFilterButton: true,
           cellRenderer: ({ value }) => value?.name,
+          floatingFilterComponent: 'dropdownFilter',
+          floatingFilterComponentParams: {
+            suppressFilterButton: true,
+            optionsLabel: 'Создатель',
+            options: userStore.users.map((u) => ({
+              label: u.name,
+              value: u.id,
+            })),
+          },
         },
         {
           headerName: 'Грузоотправитель',
           field: 'shipper',
           width: 250,
+          sortable: false,
+          noSearch: true,
+          suppressFilterButton: true,
           cellRenderer: ({ value }) => value?.name,
+          floatingFilterComponent: 'dropdownFilter',
+          floatingFilterComponentParams: {
+            suppressFilterButton: true,
+            optionsLabel: 'Грузоотправитель',
+            options: dataStore.shippers.map((u) => ({
+              label: u.name,
+              value: u.id,
+            })),
+          },
         },
         {
           headerName: 'Клиент фирма',
           field: 'client',
           width: 200,
+          sortable: false,
+          noSearch: true,
+          suppressFilterButton: true,
           cellRenderer: ({ value }) => value?.name,
+          floatingFilterComponent: 'dropdownFilter',
+          floatingFilterComponentParams: {
+            suppressFilterButton: true,
+            optionsLabel: 'Клиент фирма',
+            options: dataStore.clients.map((u) => ({
+              label: u.name,
+              value: u.id,
+            })),
+          },
         },
         {
-          headerName: 'Товара',
+          headerName: 'Товар',
           field: 'product',
           width: 200,
+          sortable: false,
+          noSearch: true,
+          suppressFilterButton: true,
           cellRenderer: ({ value }) => value?.name,
+          floatingFilterComponent: 'dropdownFilter',
+          floatingFilterComponentParams: {
+            suppressFilterButton: true,
+            optionsLabel: 'Товар',
+            options: dataStore.products.map((u) => ({
+              label: u.name,
+              value: u.id,
+            })),
+          },
         },
         {
           headerName: 'Исполнитель',
           field: 'declarant',
-          width: 250,
+          sortable: false,
+          noSearch: true,
+          suppressFilterButton: true,
           cellRenderer: ({ value }) => value?.name,
+          floatingFilterComponent: 'dropdownFilter',
+          floatingFilterComponentParams: {
+            suppressFilterButton: true,
+            optionsLabel: 'Создатель',
+            options: userStore.users.map((u) => ({
+              label: u.name,
+              value: u.id,
+            })),
+          },
         },
         {
           headerName: 'Контейнер №',
@@ -91,8 +155,11 @@ export default {
           floatingFilterComponent: 'dropdownFilter',
           floatingFilterComponentParams: {
             suppressFilterButton: true,
-            optionsLabel: 'Select',
-            options: statuses,
+            optionsLabel: 'Статус',
+            options: Object.keys(statuses).map((key) => ({
+              label: statuses[key],
+              value: key,
+            })),
           },
         },
         {
@@ -108,8 +175,8 @@ export default {
             showDelete: false,
             loading: that.chatLoading,
             userId: authStore.user.id,
-            viewClicked(id) {
-              that.$router.push(`/my-orders/${id}`)
+            viewClicked(data) {
+              that.$router.push(`/my-orders/${data.id}`)
             },
           },
         },

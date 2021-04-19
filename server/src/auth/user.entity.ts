@@ -1,4 +1,5 @@
 import { classToPlain, Exclude } from 'class-transformer'
+import { UserNotification } from 'src/notifications/entities/user-notification.entity'
 import { Order } from 'src/orders/entities/order.entity'
 import { Role } from 'src/roles/entities/role.entity'
 import {
@@ -38,6 +39,7 @@ export class User extends BaseEntity {
 
   @JoinColumn()
   @ManyToOne(() => Role, (role) => role.users, {
+    eager: true,
     cascade: true,
     onDelete: 'CASCADE',
   })
@@ -48,6 +50,12 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[]
+
+  @OneToMany(
+    () => UserNotification,
+    (userNotification) => userNotification.user,
+  )
+  userNotifications: UserNotification[]
 
   toJSON() {
     return classToPlain(this)

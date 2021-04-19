@@ -5,6 +5,7 @@ import { CreateClientDto, UpdateClientDto } from './dto/client.dto'
 import { CreateDepartmentDto, UpdateDepartmentDto } from './dto/department.dto'
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto'
 import { CreateShipperDto, UpdateShipperDto } from './dto/shipper.dto'
+import { ClientDirectors } from './entities/client-directors.entity'
 import { Client } from './entities/client.entity'
 import { Department } from './entities/department.entity'
 import { Product } from './entities/product.entity'
@@ -15,6 +16,8 @@ export class DatabaseService {
   constructor(
     @InjectRepository(Client)
     readonly clientRepository: Repository<Client>,
+    @InjectRepository(ClientDirectors)
+    readonly clientDirectorRepository: Repository<ClientDirectors>,
     @InjectRepository(Product)
     readonly productRepository: Repository<Product>,
     @InjectRepository(Shipper)
@@ -27,26 +30,35 @@ export class DatabaseService {
     return this.clientRepository.find()
   }
 
-  createClient(createClientDto: CreateClientDto) {
-    const { date, name, info } = createClientDto
+  async createClient(createClientDto: CreateClientDto) {
+    const { date, name, info, directors } = createClientDto
+    const clientDirectors = await Promise.all(
+      directors.map((name) => this.clientDirectorRepository.create({ name })),
+    )
     const client = new Client()
     client.name = name
     client.date = new Date(date)
     client.info = info
+    client.directors = clientDirectors
 
     return this.clientRepository.save(client)
   }
 
   async updateClient(id: number, updateClientDto: UpdateClientDto) {
+    const { directors, ...otherData } = updateClientDto
     const client = await this.clientRepository.preload({
       id,
-      ...updateClientDto,
+      ...otherData,
     })
 
     if (!client) {
       throw new NotFoundException(`Client with #${id} not found`)
     }
 
+    const clientDirectors = await Promise.all(
+      directors.map((d: ClientDirectors) => this.preloadClientDirectors(d)),
+    )
+    client.directors = clientDirectors
     return this.clientRepository.save(client)
   }
 
@@ -58,6 +70,13 @@ export class DatabaseService {
     }
 
     this.clientRepository.remove(client)
+  }
+
+  private async preloadClientDirectors(director: ClientDirectors) {
+    if (director.id) {
+      return await this.clientDirectorRepository.preload(director)
+    }
+    return this.clientDirectorRepository.create({ name: director.name })
   }
   // end of client
 

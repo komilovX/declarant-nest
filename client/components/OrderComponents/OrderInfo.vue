@@ -32,7 +32,7 @@
       <span class="name text-base font-medium">Статус:&nbsp;</span>
       <span class="value">
         <order-status
-          :select="user.role == 'declarant'"
+          :select="select"
           :status="order.status"
           :order-id="order.id"
         />
@@ -50,6 +50,10 @@ export default {
     order: {
       type: Object,
       default: () => ({}),
+    },
+    select: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {

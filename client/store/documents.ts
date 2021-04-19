@@ -1,7 +1,6 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { $axios } from '~/utils/api'
 import { errorStore } from '~/utils/store-accessor'
-import { OrdersI } from '~/utils/types'
 
 @Module({
   namespaced: true,
@@ -21,6 +20,20 @@ class Documents extends VuexModule {
     try {
       this.setLoading(true)
       const document = await $axios.$post('/documents', data)
+      this.setLoading(false)
+      return document
+    } catch (error) {
+      this.setLoading(false)
+      errorStore.setError(error)
+      throw error
+    }
+  }
+
+  @Action({ rawError: true })
+  async updateDocument({ id, data }: { id: number; data: any }) {
+    try {
+      this.setLoading(true)
+      const document = await $axios.$put(`/documents/${id}`, data)
       this.setLoading(false)
       return document
     } catch (error) {
@@ -64,15 +77,29 @@ class Documents extends VuexModule {
   }
 
   @Action({ rawError: true })
-  async findOrderById(id: number): Promise<OrdersI> {
+  async giveTask(data: any) {
     try {
       this.setLoading(true)
-      const order = await $axios.$get(`/orders/${id}`)
+      const result = await $axios.$post(`/documents/giveTask`, data)
       this.setLoading(false)
-      return order
+      return result
     } catch (error) {
-      this.setLoading(false)
       errorStore.setError(error)
+      this.setLoading(false)
+      throw error
+    }
+  }
+
+  @Action({ rawError: true })
+  async updateTask({ id, data }: { id: number; data: any }) {
+    try {
+      this.setLoading(true)
+      const result = await $axios.$put(`/documents/updateTask/${id}`, data)
+      this.setLoading(false)
+      return result
+    } catch (error) {
+      errorStore.setError(error)
+      this.setLoading(false)
       throw error
     }
   }

@@ -1,5 +1,5 @@
 import * as bcrypt from 'bcrypt'
-import { getCustomRepository } from 'typeorm'
+import { Connection, getCustomRepository } from 'typeorm'
 import {
   ConflictException,
   InternalServerErrorException,
@@ -16,6 +16,9 @@ import { RoleRepository } from 'src/roles/role.repository'
 
 @EntityRepository(User)
 export class AuthRepository extends Repository<User> {
+  constructor(private connection: Connection) {
+    super()
+  }
   private roleRepository = getCustomRepository(RoleRepository)
 
   async signUp(signUpCredentialsDto: SignUpCredentialsDto): Promise<void> {
@@ -45,7 +48,14 @@ export class AuthRepository extends Repository<User> {
 
   async signIn(signInCredentialsDto: SignInCredentialsDto): Promise<User> {
     const { login, password } = signInCredentialsDto
-    const user = await this.findOne({ where: { login }, relations: ['role'] })
+    const user = await this.connection
+      .createQueryBuilder()
+      .select('user')
+      .from(User, 'user')
+      .leftJoinAndSelect('user.role', 'role')
+      .leftJoinAndSelect('role.pages', 'pages')
+      .where('user.login = :login', { login })
+      .getOne()
 
     if (user) {
       const correctPassword = await bcrypt.compare(password, user.password)
@@ -60,7 +70,7 @@ export class AuthRepository extends Repository<User> {
   }
 
   async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<void> {
-    const { role, ...otherData } = updateUserDto
+    const { role, password, ...otherData } = updateUserDto
     const userRole = await this.roleRepository.findOne({
       role,
     })
@@ -74,6 +84,10 @@ export class AuthRepository extends Repository<User> {
     })
     if (!user) {
       throw new NotFoundException(`User with #${id} not found`)
+    }
+    if (password) {
+      user.salt = await bcrypt.genSalt()
+      user.password = await bcrypt.hash(password, user.salt)
     }
     try {
       await user.save()

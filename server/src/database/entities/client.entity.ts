@@ -1,14 +1,15 @@
 import { Contract } from 'src/contract/entities/contract.entity'
-import { Document } from 'src/documents/document.entity'
 import { Order } from 'src/orders/entities/order.entity'
 import {
   BaseEntity,
   Column,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm'
+import { ClientDirectors } from './client-directors.entity'
 
 @Entity()
 export class Client extends BaseEntity {
@@ -29,4 +30,12 @@ export class Client extends BaseEntity {
 
   @ManyToOne(() => Contract, (contract) => contract.client)
   contracts: Contract[]
+
+  @JoinColumn()
+  @OneToMany(
+    () => ClientDirectors,
+    (clientDirectors) => clientDirectors.client,
+    { cascade: true, eager: true },
+  )
+  directors: ClientDirectors[]
 }

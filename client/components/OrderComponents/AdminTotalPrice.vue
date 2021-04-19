@@ -1,12 +1,12 @@
 <template>
-  <div class="container mt1">
-    <div class="inputs df">
-      <div class="df mr05">
-        <label for="kurs">Курс: </label>
+  <div class="container mt-4">
+    <div class="inputs flex">
+      <div class="flex mr-2">
+        <label for="kurs" class="font-medium">Курс: </label>
         <el-input id="kurs" v-model="course" size="mini" type="number" />
       </div>
-      <div class="df mr1">
-        <label for="persent">Коефициент: </label>
+      <div class="flex mr-2">
+        <label for="persent" class="font-medium">Коефициент: </label>
         <el-input id="persent" v-model="percent" size="mini" type="number" />
       </div>
       <el-button
@@ -29,9 +29,9 @@
       </thead>
       <tr>
         <th style="width: 100px">ИТОГО</th>
-        <td>{{ numberFormatter(price.sum) }}</td>
-        <td>{{ numberFormatter(price.dollar) }}</td>
-        <td>{{ numberFormatter(invoice) }}</td>
+        <td>{{ price.sum | numberFormatter }}</td>
+        <td>{{ price.dollar | numberFormatter }}</td>
+        <td>{{ invoice | numberFormatter }}</td>
       </tr>
       <tr>
         <th>Приход</th>
@@ -41,14 +41,14 @@
       </tr>
       <tr>
         <th>Сальдо</th>
-        <td>{{ numberFormatter(saldoSum) }}</td>
-        <td>{{ numberFormatter(saldoDollar) }}</td>
-        <td>{{ numberFormatter(saldoInvoice) }}</td>
+        <td>{{ saldoSum | numberFormatter }}</td>
+        <td>{{ saldoDollar | numberFormatter }}</td>
+        <td>{{ saldoInvoice | numberFormatter }}</td>
       </tr>
       <tr>
         <th>TOTAL KAPUSTA</th>
         <td colspan="3" style="font-weight: bold">
-          {{ numberFormatter(totalPrice) }}
+          {{ totalPrice | numberFormatter }}
         </td>
       </tr>
     </table>
@@ -56,6 +56,7 @@
 </template>
 
 <script>
+import { ordersStore } from '~/store'
 export default {
   props: {
     price: {
@@ -119,21 +120,22 @@ export default {
   methods: {
     async updateData() {
       try {
-        const formData = {
-          course: this.course,
-          percent: this.percent,
-          comingSum: this.comingSum,
-          comingDollar: this.comingDollar,
-          comingInvoice: this.comingInvoice,
+        const data = {
+          id: this.price_info.id,
+          course: +this.course,
+          percent: +this.percent,
+          comingSum: +this.comingSum,
+          comingDollar: +this.comingDollar,
+          comingInvoice: +this.comingInvoice,
         }
-        await this.$axios.$put(`api/price/${this.order_id}`, formData)
+        await ordersStore.updateOrderPrice({ id: this.order_id, data })
       } catch (e) {
         console.error('error', e)
       }
     },
     updateAndReload() {
       this.updateData()
-      location.reload()
+      // location.reload()
     },
   },
 }
@@ -147,7 +149,7 @@ table {
   border-collapse: collapse;
   border-spacing: 0px;
   border-spacing: 2px;
-  background: #95f06e;
+  background: #d4fdc0;
   color: #606266;
   font-size: 12px;
   max-width: 100%;
@@ -167,7 +169,7 @@ th {
   font-size: 14px;
   color: #606266;
   margin-bottom: 5px;
-  .df {
+  .flex {
     align-items: center;
   }
   label {

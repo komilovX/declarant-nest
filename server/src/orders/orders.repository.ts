@@ -1,10 +1,14 @@
 import { User } from 'src/auth/user.entity'
-import { EntityRepository, Like, Repository } from 'typeorm'
+import { Connection, EntityRepository, Like, Raw, Repository } from 'typeorm'
 import { Order } from './entities/order.entity'
 import { FindOrderGridDto } from './order.dto'
 
 @EntityRepository(Order)
 export class OrdersRepository extends Repository<Order> {
+  constructor(private connection: Connection) {
+    super()
+  }
+
   async findOrdersByGrid(
     findOrderGridDto: FindOrderGridDto,
     query: { deleted: boolean; archived: boolean },
@@ -14,7 +18,13 @@ export class OrdersRepository extends Repository<Order> {
 
     const filterColumns = {}
     Object.keys(filter).forEach((key) => {
-      filterColumns[key] = Like(`%${filter[key]}%`)
+      if (!isNaN(filter[key])) {
+        filterColumns[key] = Raw(
+          (alias) => `CAST(${alias} AS VARCHAR(9)) LIKE '%${filter[key]}%'`,
+        )
+      } else {
+        filterColumns[key] = Like(`%${filter[key]}%`)
+      }
     })
     let conditions
 
@@ -26,7 +36,6 @@ export class OrdersRepository extends Repository<Order> {
     } else {
       conditions = { deleted: false, archived: false, ...filterColumns }
     }
-
     return this.findAndCount({
       where: conditions,
       order: sort,
@@ -34,6 +43,7 @@ export class OrdersRepository extends Repository<Order> {
       take: limit,
     })
   }
+
   async findOrdersByUserId(findOrderGridDto: FindOrderGridDto, user: User) {
     const { filter, sort, limit, page = 1 } = findOrderGridDto
 
@@ -50,5 +60,26 @@ export class OrdersRepository extends Repository<Order> {
       skip: (page - 1) * limit,
       take: limit,
     })
+  }
+
+  async findOrderByUserDocument(id: number, user: User) {
+    return this.connection
+      .createQueryBuilder()
+      .select('order')
+      .from(Order, 'order')
+      .leftJoinAndSelect('order.documents', 'documents')
+      .leftJoinAndSelect('order.shipper', 'shipper')
+      .leftJoinAndSelect('order.client', 'client')
+      .leftJoinAndSelect('order.product', 'product')
+      .leftJoinAndSelect('order.declarant', 'declarant')
+      .leftJoinAndSelect('documents.declarant', 'manager')
+      .leftJoinAndSelect('documents.documentType', 'documentType')
+      .leftJoinAndSelect('documents.creator', 'creator')
+      .leftJoinAndSelect('documents.price', 'price')
+      .where('order.id = :id AND (manager.id = :userId OR manager IS NULL)', {
+        id,
+        userId: user.id,
+      })
+      .getOne()
   }
 }

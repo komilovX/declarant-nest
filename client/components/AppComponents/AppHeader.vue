@@ -1,5 +1,5 @@
 <template>
-  <div class="">
+  <div>
     <div class="flex items-center">
       <h2 class="mr-2 text-lg font-medium">{{ headerText }}</h2>
       <app-add-button

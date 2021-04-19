@@ -7,6 +7,7 @@
       />
       <h2 class="text-xl font-medium mr-4">#{{ $route.params.id }}</h2>
       <el-button
+        v-role:update="'orders'"
         type="primary"
         size="mini"
         @click="$router.push(`/orders/${order.id}`)"
@@ -50,43 +51,42 @@
           <h4 class="text-center text-lg font-medium mr-4">
             Необходимые Услуги, Документы
           </h4>
-          <app-add-button @on-click="documentDialog = true" />
         </div>
-        <div style="padding: 8px" class="df">
-          <div class="cubics flex">
-            <div class="flex mr1">
-              <div class="service-row" />
-              <span>Услуги</span>
-            </div>
-            <div class="flex">
-              <div class="declarant-row" />
-              <span>Документы</span>
-            </div>
-          </div>
+        <div
+          class="mt-3 p-2 bg-white flex justify-between items-center inline-block"
+        >
+          <order-task-statuses />
+          <el-button type="text" @click="contractDialog = true"
+            >Контракты</el-button
+          >
         </div>
         <admin-info-table
           :service-list="serviceList"
           :button="!order.deleted && !order.archived"
-          @document-clicked="openUpdateDialog"
         />
+        <div class="mb-14">
+          <div class="flex py-4" style="align-items: center">
+            <h4 class="text-center text-lg font-medium mr-4">
+              Ваши документы и услуги
+            </h4>
+            <app-add-button @on-click="documentDialog = true" />
+          </div>
+          <admin-personal-table
+            :documents="adminPersonalDocuments"
+            @updateDocument="openUpdateDialog($event)"
+          />
+        </div>
         <admin-total-price
-          v-if="serviceList.length > 0"
+          v-if="serviceList.length > 0 || adminPersonalDocuments.length > 0"
           ref="totalPriceRef"
           :price="totalPrice"
           :order_id="order.id"
           :price_info="orderPrice"
         />
-        <convert-order-pdf
-          id="print-area"
-          ref="converter"
-          :service-list="serviceList"
-          :price="totalPrice"
-          :price_info="orderPrice"
-        />
-        <div class="df mt1">
+        <div class="flex mt-2">
           <el-button
             v-if="serviceList.length > 0"
-            size="medium"
+            size="small"
             type="primary"
             plain
             @click="printDocument"
@@ -95,31 +95,43 @@
           </el-button>
           <el-button
             v-if="serviceList.length > 0"
-            size="medium"
+            size="small"
             type="success"
             :loading="finishLoading"
-            @click="changeOrderStatus()"
+            @click="changeOrderStatus"
             >Закончить</el-button
           >
         </div>
+        <convert-order-pdf
+          id="print-area"
+          ref="converter"
+          :service-list="serviceList"
+          :price="totalPrice"
+          :price_info="orderPrice"
+        />
       </el-col>
     </el-row>
     <CreateOrderDocument
       :visible="documentDialog"
       :documents="documentTypeStore.documentTypes"
-      :order="order"
+      :order_id="order.id"
       :on-close="() => (documentDialog = false)"
-      @documentAdded="documentAdded($event)"
+      @documentAdded="documents.push($event)"
     />
-    <update-order-document
+    <update-manager-task
       :visible="updateDialog"
       :document="changedDocument"
-      :order_id="order.id"
-      :on-close="() => (updateDialog = false)"
-      @file-deleted="deleteDclarantFile($event)"
-      @delete-document="deleteDocument($event)"
-      @updated="onDocumentUpdated($event)"
-      @documentAdded="documentAdded($event)"
+      :orderId="order.id"
+      :onClose="() => (updateDialog = false)"
+      @fileAdded="fileAdded($event)"
+      @fileRemoved="fileRemoved($event)"
+      @documentUpdated="documentUpdated"
+    />
+    <order-contracts
+      :visible="contractDialog"
+      :on-close="() => (contractDialog = false)"
+      :clientId="order.client.id"
+      :shipperId="order.shipper.id"
     />
   </div>
 </template>
@@ -127,26 +139,30 @@
 <script>
 import AdminTotalPrice from '@/components/OrderComponents/AdminTotalPrice.vue'
 import CreateOrderDocument from '@/components/DialogComponents/CreateOrderDocument.vue'
-import UpdateOrderDocument from '@/components/DialogComponents/UpdateOrderDocument.vue'
 import OrderInfo from '~/components/OrderComponents/OrderInfo.vue'
 import AdminFileTable from '~/components/OrderComponents/AdminFileTable.vue'
 import AppAddButton from '~/components/AppComponents/AppAddButton.vue'
 import AdminInfoTable from '~/components/OrderComponents/AdminInfoTable.vue'
 import ConvertOrderPdf from '~/components/OrderComponents/ConvertOrderPdf.vue'
 
-import { documentTypeStore, ordersStore } from '~/store'
+import { authStore, documentTypeStore, ordersStore } from '~/store'
 import { DocumenTypes } from '~/utils/enums'
+import OrderTaskStatuses from '~/components/OrderComponents/OrderTaskStatuses.vue'
+import AdminPersonalTable from '~/components/OrderComponents/AdminPersonalTable.vue'
+import OrderContracts from '~/components/OrderComponents/OrderContracts.vue'
 
 export default {
   components: {
     CreateOrderDocument,
-    UpdateOrderDocument,
     OrderInfo,
     AppAddButton,
     AdminTotalPrice,
     AdminInfoTable,
     AdminFileTable,
     ConvertOrderPdf,
+    OrderTaskStatuses,
+    AdminPersonalTable,
+    OrderContracts,
   },
   beforeRouteLeave(_to, _from, next) {
     if (this.serviceList.length > 0) {
@@ -154,7 +170,18 @@ export default {
     }
     next()
   },
-  async asyncData({ route }) {
+  validate() {
+    const pages = authStore.user?.role.pages
+    if (pages) {
+      const page = pages.find((p) => p.value === 'orders')
+      if (page) {
+        return true
+      }
+      return false
+    }
+    return false
+  },
+  async asyncData({ route, error }) {
     try {
       const {
         documents,
@@ -164,9 +191,10 @@ export default {
       if (!documentTypeStore.documentTypes.length) {
         await documentTypeStore.fetchDocumentTypes()
       }
+      console.log(`order`, order)
       return { order, documents, orderPrice }
-    } catch (error) {
-      console.log(error)
+    } catch (err) {
+      error(err)
     }
   },
   data() {
@@ -175,22 +203,28 @@ export default {
       finishLoading: false,
       documentDialog: false,
       updateDialog: false,
+      contractDialog: false,
       changedDocument: {},
     }
   },
   computed: {
     serviceList() {
       return this.documents.filter(
-        ({ documentType }) =>
-          documentType === DocumenTypes.DECLARANT ||
-          documentType === DocumenTypes.SERVICE
+        ({ type, creator }) =>
+          type === DocumenTypes.DECLARANT && creator.id !== authStore.user.id
+      )
+    },
+    adminPersonalDocuments() {
+      return this.documents.filter(
+        ({ type, creator }) =>
+          type === DocumenTypes.DECLARANT && creator.id === authStore.user.id
       )
     },
     totalPrice() {
       let dollar = 0
       let sum = 0
       let invoice = 0
-      this.serviceList.forEach((doc) => {
+      this.serviceList.concat(this.adminPersonalDocuments).forEach((doc) => {
         doc.price.forEach((p) => {
           if (p.currency == '$') {
             dollar += +p.price
@@ -211,74 +245,42 @@ export default {
     },
   },
   methods: {
-    documentAdded({ document, type }) {
-      if (type == 'document') {
-        this.declarant_documents.push(document)
-      } else {
-        this.services.push(document)
-      }
-      this.documentDialog = false
-    },
     openUpdateDialog(row) {
       this.changedDocument = row
       this.updateDialog = true
     },
-    async deleteDclarantFile({ id, file }) {
-      try {
-        await this.$store.dispatch('orders/deleteDeclarantDocumentFile', {
-          id,
-          file,
-        })
-        const index = this.declarant_documents.findIndex((d) => d.id == id)
-        let files = JSON.parse(this.declarant_documents[index].files)
-        files = JSON.stringify(files.filter((f) => f !== file))
-        this.changedDocument.files = this.changedDocument.files.filter(
-          (f) => f !== file
-        )
-        this.declarant_documents[index].files = files
-      } catch (e) {
-        console.log(e)
-      }
-    },
-    onDocumentUpdated({ document, type }) {
-      console.log('document', document)
-      if (type === 'document') {
-        const index = this.declarant_documents.findIndex(
-          (d) => d.id == document.id
-        )
-        this.declarant_documents[index] = document
-      } else {
-        const index = this.services.findIndex((d) => d.id == document.id)
-        this.services[index] = document
-      }
-      this.updateDialog = false
-    },
-    async deleteDocument({ id, type }) {
-      try {
-        if (type === 'declarant') {
-          await this.$store.dispatch('orders/deleteDeclarantDocument', id)
-          this.declarant_documents = this.declarant_documents.filter(
-            (d) => d.id != id
-          )
-        } else {
-          await this.$axios.$delete(`api/service/${id}`)
-          this.services = this.services.filter((f) => f.id != id)
-        }
-        this.updateDialog = false
-        this.$message.success('Документ успешно удален')
-      } catch (e) {
-        console.log(e)
-      }
-    },
     async changeOrderStatus() {
       try {
-        this.finishLoading = true
-        await this.$axios.$put(`api/orders/${this.order.id}/archive`)
-        this.finishLoading = false
+        await ordersStore.updateOrderItems({
+          id: this.order.id,
+          data: { archived: true },
+        })
         this.$router.push('/orders')
       } catch (e) {
-        this.finishLoading = false
         console.log(e)
+      }
+    },
+    documentUpdated(document) {
+      const index = this.documents.findIndex((d) => d.id === document.id)
+      if (index !== -1) {
+        this.documents.splice(index, 1, document)
+        this.updateDialog = false
+      }
+    },
+    fileAdded(file) {
+      const document = this.documents.find(
+        (d) => d.id === this.changedDocument.id
+      )
+      if (document) {
+        document.files ? document.files.push(file) : (document.files = [file])
+      }
+    },
+    fileRemoved(file) {
+      const document = this.documents.find(
+        (d) => d.id === this.changedDocument.id
+      )
+      if (document) {
+        document.files = document.files.filter((f) => f !== file)
       }
     },
     printDocument() {
@@ -287,23 +289,3 @@ export default {
   },
 }
 </script>
-
-<style lang="scss" scoped>
-.cubics {
-  padding: 5px;
-  [class$='-row'] {
-    width: 20px;
-    height: 20px;
-    margin: 0 8px;
-  }
-  .service-row {
-    background-color: rgba(252, 0, 0, 0.3);
-  }
-  .declarant-row {
-    background-color: rgba(1, 69, 255, 0.3);
-  }
-  .task-row {
-    background-color: rgba(248, 232, 85, 0.5);
-  }
-}
-</style>

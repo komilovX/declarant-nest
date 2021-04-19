@@ -15,6 +15,7 @@ import {
 } from 'typeorm'
 import { OrderPrice } from './order-price.entity'
 import { OrderStatus } from 'src/utils/lib/types'
+import { ClientDirectors } from 'src/database/entities/client-directors.entity'
 
 @Entity()
 export class Order extends BaseEntity {
@@ -68,6 +69,12 @@ export class Order extends BaseEntity {
   @JoinColumn()
   @ManyToOne(() => Client, (client) => client.orders, { eager: true })
   client: Client
+
+  @JoinColumn()
+  @ManyToOne(() => ClientDirectors, (clientDirector) => clientDirector.orders, {
+    eager: true,
+  })
+  clientDirector: ClientDirectors
 
   @JoinColumn()
   @ManyToOne(() => Shipper, (shipper) => shipper.orders, { eager: true })

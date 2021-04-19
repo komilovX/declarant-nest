@@ -3,10 +3,13 @@ import { $axios } from '~/utils/api'
 import { errorStore } from '~/utils/store-accessor'
 
 export interface PagesI {
-  id: number
+  id?: number
   name: string
+  create?: boolean
+  read?: boolean
+  update?: boolean
+  delete?: boolean
 }
-
 export interface RolesI {
   id?: number
   role: string

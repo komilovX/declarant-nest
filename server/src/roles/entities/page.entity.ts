@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import { Role } from './role.entity'
 
 @Entity()
@@ -7,8 +7,20 @@ export class Page {
   id: number
 
   @Column()
-  name: string
+  value: string
 
-  @ManyToMany(() => Role, (role) => role.pages)
-  roles: Role[]
+  @Column({ default: true })
+  read: boolean
+
+  @Column({ default: false })
+  create: boolean
+
+  @Column({ default: false })
+  delete: boolean
+
+  @Column({ default: false })
+  update: boolean
+
+  @ManyToOne(() => Role, (role) => role.pages)
+  roles: Role
 }

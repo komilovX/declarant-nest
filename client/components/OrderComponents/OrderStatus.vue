@@ -24,6 +24,7 @@
         circle
         plain
         icon="el-icon-check"
+        :loading="ordersStore.loading"
         @click="updateOrderStatus"
       />
     </div>
@@ -31,6 +32,7 @@
 </template>
 
 <script>
+import { ordersStore } from '~/store'
 import { statuses } from '~/utils/data'
 
 export default {
@@ -51,6 +53,7 @@ export default {
   data() {
     return {
       orderStatus: this.status,
+      ordersStore,
       statuses,
       colors: {
         new: 'success',
@@ -64,8 +67,9 @@ export default {
   methods: {
     async updateOrderStatus() {
       try {
-        await this.$axios.$put(`api/orders/${this.orderId}`, {
-          status: this.orderStatus,
+        await ordersStore.updateOrderItems({
+          id: this.orderId,
+          data: { status: this.orderStatus },
         })
         this.$message.success('Статус успешно обновлен')
       } catch (e) {

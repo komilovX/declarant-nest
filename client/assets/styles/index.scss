@@ -29,3 +29,19 @@
   color: white;
   background: #374151;
 }
+.el-table__expanded-cell {
+  padding: 10px 50px;
+  font-size: 16px;
+}
+.el-table .task-row {
+  background-color: #fef0f0;
+}
+.el-table .done-row {
+  background-color: #ecf5ff;
+}
+.el-table .returned-row {
+  background-color: #f4f4f5;
+}
+.el-table .finished-row {
+  background-color: #f0f9eb;
+}

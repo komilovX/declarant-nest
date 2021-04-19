@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator'
+import { Currency } from 'src/utils/lib/types'
 
 export class CreateOrderDto {
   @IsOptional()
@@ -30,6 +31,9 @@ export class CreateOrderDto {
 
   @IsNotEmpty()
   clientId: string
+
+  @IsNotEmpty()
+  clientDirectorId: string
 
   @IsNotEmpty()
   shipperId: string
@@ -58,6 +62,9 @@ export class UpdateOrderDto {
   clientId: string
 
   @IsNotEmpty()
+  clientDirectorId: string
+
+  @IsNotEmpty()
   shipperId: string
 }
 
@@ -79,5 +86,39 @@ export interface CreateIncomingDocument {
   documentTypeId: number
   number?: string
   price?: number
-  currency?: string
+  currency?: Currency
+}
+
+export interface UpdateOrderDefaultItems {
+  status?: string
+  date?: Date
+  date_income?: Date
+  container?: string
+  archived?: boolean
+  deleted?: boolean
+}
+
+export class OrderPriceDto {
+  @IsNumber()
+  id: number
+
+  @IsOptional()
+  @IsNumber()
+  course: number
+
+  @IsOptional()
+  @IsNumber()
+  percent: number
+
+  @IsOptional()
+  @IsNumber()
+  comingSum: number
+
+  @IsOptional()
+  @IsNumber()
+  comingDollar: number
+
+  @IsOptional()
+  @IsNumber()
+  comingInvoice: number
 }

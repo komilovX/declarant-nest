@@ -127,10 +127,6 @@ export default {
       type: Array,
       default: () => [],
     },
-    documentTypes: {
-      type: Array,
-      default: () => [],
-    },
     order_id: {
       type: Number,
       required: true,
@@ -171,9 +167,6 @@ export default {
         .filter((doc) => doc.types.includes(DocumenTypes.DECORATED))
         .filter((d) => !ids.includes(d.number))
     },
-  },
-  mounted() {
-    console.log(`decoratedDocuments`, this.decoratedDocuments)
   },
   methods: {
     handleFileChange(file) {

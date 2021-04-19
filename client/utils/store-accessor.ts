@@ -10,6 +10,8 @@ import DocumentType from '~/store/document-types'
 import Contracts from '~/store/contracts'
 import Orders from '~/store/orders'
 import Documents from '~/store/documents'
+import Notifications from '~/store/notifications'
+import Statistics from '~/store/statistics'
 
 let authStore: Auth
 let dataStore: Data
@@ -19,6 +21,8 @@ let documentsStore: Documents
 let contractStore: Contracts
 let ordersStore: Orders
 let rolesStore: Roles
+let notificationStore: Notifications
+let statisticsStore: Statistics
 let errorStore: Error
 
 function initialiseStores(store: Store<any>): void {
@@ -30,6 +34,8 @@ function initialiseStores(store: Store<any>): void {
   contractStore = getModule(Contracts, store)
   ordersStore = getModule(Orders, store)
   rolesStore = getModule(Roles, store)
+  notificationStore = getModule(Notifications, store)
+  statisticsStore = getModule(Statistics, store)
   errorStore = getModule(Error, store)
 }
 
@@ -44,4 +50,6 @@ export {
   errorStore,
   documentTypeStore,
   documentsStore,
+  notificationStore,
+  statisticsStore,
 }

@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   UploadedFile,
   UploadedFiles,
   UseInterceptors,
@@ -20,7 +21,11 @@ import { User } from 'src/auth/user.entity'
 import { GetUser } from 'src/common/decorators/get-user.decorator'
 import { editFileName } from 'src/utils/file-uploading.utils'
 import { DocumentsService } from './documents.service'
-import { CreateDocumentDto } from './dto/create-document.dto'
+import {
+  CreateDocumentDto,
+  GiveTaskDocumentDto,
+} from './dto/create-document.dto'
+import { FindOrderGridDto } from 'src/orders/order.dto'
 import { UpdateDocumentDto } from './dto/update-document.dto'
 
 @Controller('documents')
@@ -54,6 +59,19 @@ export class DocumentsController {
     return this.documentService.getAllDocuments()
   }
 
+  @Post('/declarant')
+  getAllDocumentsByUserId(
+    @Body() findOrderGridDto: FindOrderGridDto,
+    @Query('status') status: string | string[],
+    @GetUser() user: User,
+  ) {
+    return this.documentService.getAllDocumentsByUserId(
+      user,
+      findOrderGridDto,
+      status,
+    )
+  }
+
   @Put('/:id')
   updateDocument(
     @Param('id') id: number,
@@ -81,6 +99,23 @@ export class DocumentsController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     return this.documentService.addDocumentFile(id, file)
+  }
+
+  @Post('/giveTask')
+  giveTask(
+    @GetUser() user: User,
+    @Body() giveTaskDocumentDto: GiveTaskDocumentDto,
+  ) {
+    return this.documentService.giveTask(user, giveTaskDocumentDto)
+  }
+
+  @Put('/updateTask/:id')
+  updateTask(
+    @Param('id') id: number,
+    @GetUser() user: User,
+    @Body() giveTaskDocumentDto: GiveTaskDocumentDto,
+  ) {
+    return this.documentService.updateTask(id, giveTaskDocumentDto, user)
   }
 
   @Delete('/:id')

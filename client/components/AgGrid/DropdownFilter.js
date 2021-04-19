@@ -9,23 +9,9 @@ export default Vue.component('DropDownFloatingFilter', {
     }
   },
   beforeMount() {
-    console.log(`object`)
     this.options = this.params.options
-    this.optionsLabel = this.params.optionsLabel
+    this.optionsLabel = this.params.optionsLabel || 'Select'
     this.selectedOption = null
-
-    if (!this.params.options) {
-      this.options = [
-        {
-          label: 'Yes',
-          value: true,
-        },
-        {
-          label: 'No',
-          value: false,
-        },
-      ]
-    }
   },
 
   methods: {
@@ -46,10 +32,10 @@ export default Vue.component('DropDownFloatingFilter', {
     v-model="selectedOption" 
     clearable size="small" 
     @change="valueChanged" 
-    filterable placeholder="Статус"
+    filterable :placeholder="optionsLabel"
   >
     <el-option
-      v-for="(el, index) in [{value: 'finished', label: 'Yes'}, {value: 'new', label: 'No'}]"
+      v-for="(el, index) in options"
       :key="index"
       :value="el.value"
       :label="el.label"

@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { User } from 'src/auth/user.entity'
 import { DatabaseModule } from 'src/database/database.module'
 import { DocumentType } from 'src/document-type/document-type.entity'
+import { DocumentPrice } from 'src/documents/document-price.entity'
 import { Document } from 'src/documents/document.entity'
 import { DocumentsModule } from 'src/documents/documents.module'
 import { OrderPrice } from './entities/order-price.entity'
@@ -20,6 +21,7 @@ import { OrdersService } from './orders.service'
       User,
       DocumentType,
       Document,
+      DocumentPrice,
     ]),
     DocumentsModule,
     DatabaseModule,

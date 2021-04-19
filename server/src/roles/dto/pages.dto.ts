@@ -1,11 +1,21 @@
+import { PartialType } from '@nestjs/mapped-types'
 import { IsNotEmpty, IsOptional } from 'class-validator'
 
 export class CreatePageDto {
   @IsNotEmpty()
+  value: string
+
   @IsOptional()
-  name: string
+  create: boolean
+
+  @IsOptional()
+  read: boolean
+
+  @IsOptional()
+  update: boolean
+
+  @IsOptional()
+  delete: boolean
 }
 
-export class UpdatePageDto {
-  name?: string
-}
+export class UpdatePageDto extends PartialType(CreatePageDto) {}

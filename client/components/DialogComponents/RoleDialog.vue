@@ -27,6 +27,12 @@
         />
       </el-form-item>
       <el-form-item label="Cтраницы">
+        <div class="flex justify-end">
+          <span class="inline-block mx-8">R</span>
+          <span class="inline-block mx-2">C</span>
+          <span class="inline-block mx-8">U</span>
+          <span class="inline-block ml-2">D</span>
+        </div>
         <el-tree
           ref="tree"
           :data="treeData"
@@ -35,7 +41,26 @@
           node-key="value"
           :default-checked-keys="checkedKeys"
           class="permission-tree"
-        />
+        >
+          <span slot-scope="{ node }" class="custom-tree-node">
+            <span>{{ node.label }}</span>
+            <span v-if="!node.childNodes.length">
+              <el-checkbox v-model="node.data.read" disabled />
+              <el-checkbox
+                v-model="node.data.create"
+                :disabled="node.data.disabled"
+              />
+              <el-checkbox
+                v-model="node.data.update"
+                :disabled="node.data.disabled"
+              />
+              <el-checkbox
+                v-model="node.data.delete"
+                :disabled="node.data.disabled"
+              />
+            </span>
+          </span>
+        </el-tree>
       </el-form-item>
     </el-form>
 
@@ -60,6 +85,7 @@ import Vue from 'vue'
 import { sidebarRoles } from '@/assets/config/sidebar'
 import { rolesStore } from '~/store'
 import { mapRulesByValue } from '~/utils/form-rules'
+import { PagesI } from '~/store/roles'
 export default Vue.extend({
   props: {
     visible: {
@@ -82,13 +108,14 @@ export default Vue.extend({
       defaultProps: {
         children: 'childs',
         label: 'name',
+        disabled: 'disabled',
       },
       roleForm: {
         role: '',
         name: '',
         description: '',
       },
-      treeData: sidebarRoles,
+      treeData: sidebarRoles(),
       rules: mapRulesByValue(['name', 'role', 'description']),
     }
   },
@@ -96,26 +123,63 @@ export default Vue.extend({
     type(value) {
       if (value === 'edit') {
         this.setRole()
+      } else {
+        this.clearForms()
+      }
+    },
+    role(value) {
+      if (this.type === 'edit' && value) {
+        this.setRole()
       }
     },
   },
   mounted() {
     if (this.type === 'edit') {
       this.setRole()
+    } else {
+      this.clearForms()
     }
   },
   methods: {
     setRole() {
-      const sitePages = [...sidebarRoles]
+      const sitePages = sidebarRoles()
         .filter((c) => c.childs)
         .map((c) => c.value)
 
       this.roleForm.role = this.role.role
       this.roleForm.name = this.role.name
       this.roleForm.description = this.role.description
-      this.checkedKeys = this.role.pages
-        .filter((c: any) => !sitePages.includes(c.name))
-        .map((r: any) => r.name)
+      this.checkedKeys = this.role?.pages
+        .filter((c: any) => !sitePages.includes(c.value))
+        .map((r: any) => r.value)
+
+      if (this.role.pages) {
+        this.treeData = sidebarRoles().map((role: any) => {
+          if (role.childs) {
+            const childs = role.childs.map((ch: any) => {
+              const page = this.role.pages.find(
+                (p: any) => p.value === ch.value
+              )
+              ch = { ...ch, ...page }
+              return ch
+            })
+            role.childs = childs
+            return role
+          } else {
+            const page = this.role.pages.find(
+              (p: any) => p.value === role.value
+            )
+            role = { ...role, ...page }
+            return role
+          }
+        })
+      }
+    },
+    clearForms() {
+      this.treeData = sidebarRoles()
+      this.checkedKeys = sidebarRoles()
+        .filter((d) => d.disabled)
+        .map((d) => d.value) as any
     },
     submitForm(form: any) {
       ;(this.$refs[form] as any).validate(
@@ -130,7 +194,28 @@ export default Vue.extend({
               .tree as Tree).getHalfCheckedKeys()
 
             const keys = (this.$refs.tree as Tree).getCheckedKeys()
-            const pages = halfCheckedKeys.concat(keys)
+            const allCheckedKeys = halfCheckedKeys.concat(keys)
+
+            const allTreeData: any = []
+            this.treeData.forEach((data) => {
+              if (data.childs) {
+                const { childs, ...otherData } = data
+                allTreeData.push(...childs)
+                allTreeData.push(otherData)
+              } else {
+                allTreeData.push(data)
+              }
+            })
+
+            const pages: PagesI[] = []
+            allCheckedKeys.forEach((value: string) => {
+              const page = allTreeData.find((p: any) => {
+                return p.value === value
+              })
+              if (page) {
+                pages.push(page)
+              }
+            })
             try {
               if (this.type === 'create') {
                 await this.rolesStore.createRole({ ...formData, pages })

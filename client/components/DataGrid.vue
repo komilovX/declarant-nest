@@ -2,7 +2,6 @@
   <div style="padding: 0">
     <ag-grid-vue
       style="width: 100%; height: 72vh"
-      :get-row-style="getRowStyle"
       class="ag-theme-material w-100 my-4 ag-grid-table vs-con-loading__container"
       :grid-options="gridOptions"
       :default-col-def="defaultColDef"
@@ -38,6 +37,7 @@ import { AgGridVue } from 'ag-grid-vue'
 import { AllCommunityModules } from '@ag-grid-community/all-modules'
 import DropdownFilter from './AgGrid/DropdownFilter.js'
 import { localeText } from '~/utils/data'
+import { gridCellStyle } from '~/utils/order.util.js'
 
 export default {
   components: { AgGridVue },
@@ -71,11 +71,12 @@ export default {
           filterOptions: ['contains'],
           suppressAndOrCondition: true,
         },
-        cellStyle: { 'justify-content': 'flex-end' },
+        cellStyle: gridCellStyle,
       },
       gridOptions: {
         rowModelType: 'infinite',
         suppressPropertyNamesCheck: true,
+        tooltipShowDelay: 1000,
         overlayLoadingTemplate:
           '<span class="ag-overlay-loading-center">Подождите, пока загружаются ваши данные</span>',
         overlayNoRowsTemplate:
@@ -124,7 +125,7 @@ export default {
           }
           that.gridApi.showLoadingOverlay()
           const orders = await that.fetchData(queryData)
-          that.totalCount = orders[1]
+          that.totalCount = orders && orders[1]
           if (orders[1] === 0) {
             that.gridApi.showNoRowsOverlay()
           } else {

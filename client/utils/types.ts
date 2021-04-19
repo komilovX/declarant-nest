@@ -1,8 +1,15 @@
 import { DocumenTypes, OrderStatuses, UserRoles } from './enums'
 
-export interface UserPagesI {
+interface IObjectKeys {
+  [key: string]: string | number | boolean | undefined
+}
+export interface UserPagesI extends IObjectKeys {
   id: number
-  name: string
+  value: string
+  create: boolean
+  read: boolean
+  delete: boolean
+  update: boolean
 }
 
 export interface UserRoleI {
@@ -28,12 +35,17 @@ export interface UsersI {
   role: UserRoles
   username?: string
 }
-
+export interface ClientDirectors {
+  id?: number
+  name: string
+}
 export interface Clients {
   id?: number
   date: Date
   name: string
+  directors: ClientDirectors[]
   info: string
+  changed?: boolean
 }
 
 export interface DocumentTypesI {
@@ -91,6 +103,7 @@ export interface OrdersI {
   product: ProductI
   post_number: string
   client: Clients
+  clientDirector: ClientDirectors
   shipper: Shippers
   status: OrderStatuses
   archived: boolean

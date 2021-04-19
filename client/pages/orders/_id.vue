@@ -42,39 +42,27 @@
               align="center"
               prop="price"
             >
-              <template slot-scope="{ row: { needPrice, price }, $index }">
-                <div v-if="needPrice || price" class="flex mr-1">
+              <template slot-scope="{ row: { needPrice, price } }">
+                <div v-if="needPrice" class="flex mr-1">
                   <el-input
-                    v-model="documents[$index].price"
+                    v-model="price[0].price"
                     size="mini"
                     style="min-width: 80px; margin-right: 4px"
-                    type="text"
+                    type="number"
                   />
-                  <el-select v-model="documents[$index].currency" size="mini">
+                  <el-select
+                    v-model="price[0].currency"
+                    placeholder="Валюта"
+                    size="mini"
+                  >
                     <el-option
-                      v-for="s in ['$', 'uzs', 'перечисление']"
-                      :key="s"
-                      :label="s"
-                      :value="s"
+                      v-for="s in currencyList"
+                      :key="s.value"
+                      :label="s.type"
+                      :value="s.value"
                     />
                   </el-select>
-                  <el-button
-                    v-if="!price"
-                    size="mini"
-                    icon="el-icon-close"
-                    class="fs-icon"
-                    type="text"
-                    @click="changePriceInputStatus($index)"
-                  />
                 </div>
-                <el-button
-                  v-else
-                  size="small"
-                  type="text"
-                  @click="changePriceInputStatus($index)"
-                >
-                  Добавить
-                </el-button>
               </template>
             </el-table-column>
             <el-table-column min-width="120" label="Файл" align="center">
@@ -127,7 +115,7 @@
               </template>
             </el-table-column>
             <el-table-column min-width="100" label="Действия" align="center">
-              <template slot-scope="{ row: { id }, $index }">
+              <template slot-scope="{ row: { id }, row }">
                 <el-button
                   size="mini"
                   type="success"
@@ -135,7 +123,7 @@
                   icon="el-icon-check"
                   class="px-1.5 py-1"
                   :loading="ordersStore.loading"
-                  @click="updateIncomingDocument($index)"
+                  @click="updateIncomingDocument(row)"
                 />
                 <el-button
                   size="mini"
@@ -162,7 +150,7 @@
           label-width="160px"
           label-position="top"
         >
-          <el-col :span="24" :md="20">
+          <el-col :span="24" :md="24">
             <el-col :span="12" :md="5" :sm="12">
               <el-form-item label="Дата" prop="date">
                 <el-date-picker
@@ -174,7 +162,7 @@
                 />
               </el-form-item>
             </el-col>
-            <el-col :span="12" :md="5" :sm="12">
+            <el-col :span="12" :md="4" :sm="12">
               <el-form-item label="Пост номер" prop="post_number">
                 <el-input
                   v-model="ordersForm.post_number"
@@ -202,6 +190,7 @@
                     size="small"
                     style="width: 100%; flex-grow: 1"
                     placeholder="Клиент фирма"
+                    @change="onClientSelectChange"
                   >
                     <el-option
                       v-for="(c, index) in dataStore.clients"
@@ -227,6 +216,24 @@
                     @click="clientDialogVisible = true"
                   />
                 </div>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12" :md="4" :sm="12">
+              <el-form-item label="Клиент владелец" prop="clientDirectorId">
+                <el-select
+                  v-model="ordersForm.clientDirectorId"
+                  filterable
+                  size="small"
+                  style="width: 100%; flex-grow: 1"
+                  placeholder="Клиент владелец"
+                >
+                  <el-option
+                    v-for="(c, index) in clientDirectors"
+                    :key="index"
+                    :label="c.name"
+                    :value="c.id"
+                  />
+                </el-select>
               </el-form-item>
             </el-col>
           </el-col>
@@ -357,12 +364,15 @@ import ShipperDialog from '@/components/DialogComponents/ShipperDialog.vue'
 import CreateClientDialog from '~/components/DialogComponents/CreateClientDialog.vue'
 import ProductDialog from '~/components/DialogComponents/ProductDialog.vue'
 import AddIncomingDocument from '~/components/DialogComponents/AddIncomingDocument.vue'
+import { currencyList } from '~/utils/data'
+
 import {
   dataStore,
   documentTypeStore,
   userStore,
   ordersStore,
   documentsStore,
+  authStore,
 } from '~/store'
 
 export default {
@@ -373,6 +383,17 @@ export default {
     AddIncomingDocument,
   },
   middleware: ['admin-auth'],
+  validate() {
+    const pages = authStore.user?.role.pages
+    if (pages) {
+      const page = pages.find((p) => p.value === 'orders')
+      if (page && page.update) {
+        return true
+      }
+      return false
+    }
+    return false
+  },
   async asyncData({ route }) {
     try {
       if (!dataStore.clients.length) {
@@ -395,6 +416,7 @@ export default {
       )
       const incomingDocuments = documents.map((d) => ({
         ...d,
+        price: d.price.length ? d.price : [{ price: '', currency: '' }],
         needPrice: !!d.price,
       }))
       return { documents: incomingDocuments, order }
@@ -408,19 +430,21 @@ export default {
     documentsStore,
     userStore,
     ordersStore,
-    currencyList: ['$', 'сум', '€'],
+    currencyList,
     incomingDialog: false,
     clientDialogVisible: false,
     productDialogVisible: false,
     shipperDialogVisible: false,
     filteredDocuments: [],
     multipleSelection: [],
+    clientDirectors: [],
     fileList: [],
     ordersForm: {
       date: new Date(),
       date_income: new Date(),
       container: '',
       clientId: '',
+      clientDirectorId: '',
       shipperId: '',
       productId: '',
       post_number: '',
@@ -468,6 +492,8 @@ export default {
     this.ordersForm.shipperId = this.order.shipper?.id
     this.ordersForm.declarantId = this.order.declarant?.id
     this.ordersForm.productId = this.order.product?.id
+    this.clientDirectors = this.order.client?.directors
+    this.ordersForm.clientDirectorId = this.order.clientDirector?.id
   },
   methods: {
     async deleteDocument(id) {
@@ -507,9 +533,6 @@ export default {
         }
       })
     },
-    changePriceInputStatus(idx) {
-      this.documents[idx].needPrice = !this.documents[idx].needPrice
-    },
     async handleFileChange(file, row) {
       const type = file.raw.type
       const idx = type.search(/png|jpeg|docx|doc|pdf|csv|xls|xlsx/)
@@ -536,6 +559,22 @@ export default {
     },
     handleFileRemove(file) {
       this.fileList = this.fileList.filter(({ uid }) => uid !== file.uid)
+    },
+    async updateIncomingDocument(row) {
+      try {
+        await this.documentsStore.updateDocument({
+          id: row.id,
+          data: row,
+        })
+        this.$message.success('Заявки успешна обнавлена')
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    onClientSelectChange(clientId) {
+      const client = dataStore.clients.find((c) => c.id === clientId)
+      if (clientId) this.clientDirectors = client.directors
+      this.ordersForm.clientDirectorId = null
     },
   },
 }

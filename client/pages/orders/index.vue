@@ -1,9 +1,14 @@
 <template>
   <div>
-    <app-header
-      header-text="Заявки"
-      @on-click="$router.push(`/orders/create-order`)"
-    />
+    <div class="flex items-center">
+      <h2 class="mr-2 text-lg font-medium">Заявки</h2>
+      <app-add-button
+        v-role:create="'orders'"
+        size="small"
+        @on-click="$router.push('/orders/create-order')"
+      />
+    </div>
+    <hr class="my-2" />
     <data-grid :fetch-data="fetchData" :column-defs="orderTableColumn" />
   </div>
 </template>
@@ -12,20 +17,34 @@
 import DataGrid from '../../components/DataGrid'
 import ActionRenderer from '../../components/AgGrid/ActionsRenderer'
 import OrderStatus from '../../components/AgGrid/OrderStatus'
-import { authStore } from '~/store'
+import { authStore, dataStore, userStore } from '~/store'
 import { statuses } from '~/utils/data'
-
+import { fetchOrderFilters } from '~/utils/fetch-service'
 export default {
   components: { DataGrid },
   middleware: ['admin-auth'],
+  validate() {
+    const pages = authStore.user?.role.pages
+    if (pages) {
+      const page = pages.find((p) => p.value === 'orders')
+      if (page) {
+        return true
+      }
+      return false
+    }
+    return false
+  },
   data: () => {
     return {
       order_id: 0,
       newDeclarant: '',
-      isChatOpen: false,
-      messages: [],
-      participants: [],
-      chatLoading: false,
+    }
+  },
+  async fetch({ error }) {
+    try {
+      await fetchOrderFilters()
+    } catch (err) {
+      error(err)
     }
   },
   computed: {
@@ -52,31 +71,91 @@ export default {
         {
           headerName: 'Создатель',
           field: 'user',
+          width: 200,
+          sortable: false,
+          noSearch: true,
+          suppressFilterButton: true,
           cellRenderer: ({ value }) => value?.name,
+          floatingFilterComponent: 'dropdownFilter',
+          floatingFilterComponentParams: {
+            suppressFilterButton: true,
+            optionsLabel: 'Создатель',
+            options: userStore.users.map((u) => ({
+              label: u.name,
+              value: u.id,
+            })),
+          },
         },
         {
           headerName: 'Грузоотправитель',
           field: 'shipper',
           width: 250,
+          sortable: false,
+          noSearch: true,
+          suppressFilterButton: true,
           cellRenderer: ({ value }) => value?.name,
+          floatingFilterComponent: 'dropdownFilter',
+          floatingFilterComponentParams: {
+            suppressFilterButton: true,
+            optionsLabel: 'Грузоотправитель',
+            options: dataStore.shippers.map((u) => ({
+              label: u.name,
+              value: u.id,
+            })),
+          },
         },
         {
           headerName: 'Клиент фирма',
           field: 'client',
           width: 200,
+          sortable: false,
+          noSearch: true,
+          suppressFilterButton: true,
           cellRenderer: ({ value }) => value?.name,
+          floatingFilterComponent: 'dropdownFilter',
+          floatingFilterComponentParams: {
+            suppressFilterButton: true,
+            optionsLabel: 'Клиент фирма',
+            options: dataStore.clients.map((u) => ({
+              label: u.name,
+              value: u.id,
+            })),
+          },
         },
         {
-          headerName: 'Товара',
+          headerName: 'Товар',
           field: 'product',
           width: 200,
+          sortable: false,
+          noSearch: true,
+          suppressFilterButton: true,
           cellRenderer: ({ value }) => value?.name,
+          floatingFilterComponent: 'dropdownFilter',
+          floatingFilterComponentParams: {
+            suppressFilterButton: true,
+            optionsLabel: 'Товар',
+            options: dataStore.products.map((u) => ({
+              label: u.name,
+              value: u.id,
+            })),
+          },
         },
         {
           headerName: 'Исполнитель',
           field: 'declarant',
-          width: 250,
+          sortable: false,
+          noSearch: true,
+          suppressFilterButton: true,
           cellRenderer: ({ value }) => value?.name,
+          floatingFilterComponent: 'dropdownFilter',
+          floatingFilterComponentParams: {
+            suppressFilterButton: true,
+            optionsLabel: 'Создатель',
+            options: userStore.users.map((u) => ({
+              label: u.name,
+              value: u.id,
+            })),
+          },
         },
         {
           headerName: 'Контейнер №',
@@ -93,8 +172,11 @@ export default {
           floatingFilterComponent: 'dropdownFilter',
           floatingFilterComponentParams: {
             suppressFilterButton: true,
-            optionsLabel: 'Select',
-            options: statuses,
+            optionsLabel: 'Статус',
+            options: Object.keys(statuses).map((key) => ({
+              label: statuses[key],
+              value: key,
+            })),
           },
         },
         {
@@ -108,10 +190,11 @@ export default {
             showView: true,
             showMessage: false,
             showDelete: true,
+            pageRoles: 'orders',
             loading: that.chatLoading,
             userId: authStore.user.id,
-            viewClicked(id) {
-              that.$router.push(`/orders/details/${id}`)
+            viewClicked(data) {
+              that.$router.push(`/orders/details/${data.id}`)
             },
             messageClicked(order) {
               that.participants = [
@@ -153,24 +236,6 @@ export default {
         console.log(error)
       }
     },
-    async fetchMessages(id) {
-      try {
-        this.chatLoading = true
-        let messages = await this.$axios.$get(`api/message/${id}`)
-        messages = messages.map((message) => {
-          if (this.user.userId == message.author) {
-            message.author = 'me'
-          }
-          return message
-        })
-        this.messages = messages
-        this.isChatOpen = true
-        this.chatLoading = false
-      } catch (error) {
-        this.chatLoading = false
-        throw error
-      }
-    },
     statusFilterParams() {
       return {
         suppressFilterButton: true,
@@ -186,23 +251,6 @@ export default {
     },
     filterTag(value, row) {
       return row.status === value
-    },
-    async updateDeclarant(currentDeclarant, index) {
-      try {
-        const { id } = this.declarants.find(
-          ({ name }) => name === currentDeclarant
-        )
-        const formData = {
-          id: this.orders[index].id,
-          declarant: currentDeclarant,
-          declarant_id: id,
-        }
-        await this.$store.dispatch('orders/updateOrder', formData)
-        this.$message.success('Oбнавлена')
-        this.orders[index].archived = false
-      } catch (error) {
-        console.log(error)
-      }
     },
     deleteOrder(row) {
       const text = 'Уверены, что хотите удалить этого заявка?'

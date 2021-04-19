@@ -85,10 +85,68 @@ class Orders extends VuexModule {
   }
 
   @Action({ rawError: true })
+  async findOrderByIdWithDetailsForDeclarant(id: number, declarant: string) {
+    try {
+      this.setLoading(true)
+      const order = await $axios.$get(
+        `/orders/detail/${id}?declarant=${declarant}`
+      )
+      this.setLoading(false)
+      return order
+    } catch (error) {
+      this.setLoading(false)
+      errorStore.setError(error)
+      throw error
+    }
+  }
+
+  @Action({ rawError: true })
+  async findOrderByUserDocument(id: number) {
+    try {
+      this.setLoading(true)
+      const order = await $axios.$get(`/orders/document/${id}`)
+      this.setLoading(false)
+      return order
+    } catch (error) {
+      this.setLoading(false)
+      errorStore.setError(error)
+      throw error
+    }
+  }
+
+  @Action({ rawError: true })
   async updateOrder({ id, data }: { id: number; data: any }) {
     try {
       this.setLoading(true)
       const order = await $axios.$put(`/orders/${id}`, data)
+      this.setLoading(false)
+      return order
+    } catch (error) {
+      this.setLoading(false)
+      errorStore.setError(error)
+      throw error
+    }
+  }
+
+  @Action({ rawError: true })
+  async updateOrderItems({ id, data }: { id: number; data: any }) {
+    try {
+      this.setLoading(true)
+      const order = await $axios.$put(`/orders/items/${id}`, data)
+      this.setLoading(false)
+      return order
+    } catch (error) {
+      this.setLoading(false)
+      errorStore.setError(error)
+      throw error
+    }
+  }
+
+  @Action({ rawError: true })
+  async updateOrderPrice({ id, data }: { id: number; data: any }) {
+    try {
+      this.setLoading(true)
+      const order = await $axios.$put(`/orders/orderPrice/${id}`, data)
       this.setLoading(false)
       return order
     } catch (error) {

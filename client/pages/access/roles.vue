@@ -1,6 +1,6 @@
 <template>
   <div>
-    <app-header header-text="Роли" @on-click="dialogVisible = true" />
+    <app-header header-text="Роли" @on-click="openDialog" />
     <div>
       <el-table :data="rolesStore.roles" class="w-100 rounded mt-6">
         <el-table-column
@@ -96,6 +96,10 @@ export default {
       this.role = this.rolesStore.roles[index]
       this.dialogType = 'edit'
       this.dialogVisible = true
+    },
+    openDialog() {
+      this.dialogVisible = true
+      this.dialogType = 'create'
     },
   },
 }

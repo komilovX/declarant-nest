@@ -84,7 +84,7 @@ export default Vue.extend({
   computed: {
     // eslint-disable-next-line vue/return-in-computed-property
     items() {
-      const pages = this.authStore.user?.role.pages.map((p) => p.name)
+      const pages = this.authStore.user?.role.pages.map((p) => p.value)
       if (pages) {
         const sitePages = this.sidebarItems.concat()
         return sitePages.filter((item) => {

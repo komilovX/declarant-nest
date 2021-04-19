@@ -1,16 +1,18 @@
 import { User } from 'src/auth/user.entity'
-import { Client } from 'src/database/entities/client.entity'
 import { DocumentType } from 'src/document-type/document-type.entity'
+import { DocumentStatus } from 'src/utils/lib/types'
 import {
   BaseEntity,
   Column,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm'
 
 import { Order } from '../orders/entities/order.entity'
+import { DocumentPrice } from './document-price.entity'
 
 @Entity()
 export class Document extends BaseEntity {
@@ -21,11 +23,17 @@ export class Document extends BaseEntity {
   order: Order
 
   @JoinColumn()
-  @ManyToOne(() => User, (user) => user.document)
+  @ManyToOne(() => User, (user) => user.document, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
   declarant: User
 
   @JoinColumn()
-  @ManyToOne(() => User, (user) => user.document, { eager: true })
+  @ManyToOne(() => User, (user) => user.document, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
   creator: User
 
   @JoinColumn()
@@ -46,9 +54,19 @@ export class Document extends BaseEntity {
   @Column({ nullable: true })
   number: string
 
-  @Column({ nullable: true })
-  price: number
+  @Column({ default: new Date() })
+  createdAt: Date
 
   @Column({ nullable: true })
-  currency: string
+  expire: Date
+
+  @JoinColumn()
+  @OneToMany(() => DocumentPrice, (documentPrice) => documentPrice.document, {
+    cascade: true,
+    eager: true,
+  })
+  price: DocumentPrice[]
+
+  @Column({ default: DocumentStatus.NEW })
+  status: string
 }

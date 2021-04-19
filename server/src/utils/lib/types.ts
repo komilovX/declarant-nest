@@ -24,3 +24,11 @@ export enum UserRoles {
   DECLARANT = 'declarant',
   MANAGER = 'manager',
 }
+
+export enum DocumentStatus {
+  NEW = 'NEW',
+  TASK = 'TASK',
+  DONE = 'DONE',
+  RETURNED = 'RETURNED',
+  FINISHED = 'FINISHED',
+}

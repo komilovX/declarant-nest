@@ -4,12 +4,12 @@
     <el-table border :data="documents" size="mini">
       <el-table-column min-width="70" label="№" align="center">
         <template slot-scope="{ row: { documentType } }">
-          {{ documentType.number }}
+          {{ documentType && documentType.number }}
         </template>
       </el-table-column>
       <el-table-column min-width="80" label="Наименование" align="center">
         <template slot-scope="{ row: { documentType } }">
-          {{ documentType.name }}
+          {{ documentType && documentType.name }}
         </template>
       </el-table-column>
       <el-table-column

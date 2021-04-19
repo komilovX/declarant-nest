@@ -6,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Client } from 'src/database/entities/client.entity'
 import { Shipper } from 'src/database/entities/shipper.entity'
 import { DocumentType } from 'src/document-type/document-type.entity'
-import { Connection, Repository } from 'typeorm'
+import { Connection, getRepository, Repository } from 'typeorm'
 import { CreateContractDto } from './contract.dto'
 import { ContractFiles } from './entities/contract-files.entity'
 import { ContractNumbers } from './entities/contract-numbers.entity'
@@ -40,6 +40,21 @@ export class ContractService {
       .getMany()
   }
 
+  async findAllContractsForOrder(clientId, shipperId) {
+    return getRepository(Contract)
+      .createQueryBuilder('contract')
+      .select(['contract.documentTypeId', 'contract.id'])
+      .distinctOn(['contract.documentTypeId'])
+      .leftJoinAndSelect('contract.documentType', 'document')
+      .leftJoin('contract.shipper', 'shipper')
+      .leftJoin('contract.client', 'client')
+      .where('shipper.id = :shipperId AND client.id = :clientId', {
+        clientId,
+        shipperId,
+      })
+      .getMany()
+  }
+
   async findAllClientsById(documentTypeId: number) {
     return this.contractRepository.find({
       select: ['documentTypeId'],
@@ -57,6 +72,7 @@ export class ContractService {
   }
 
   findAllNumbersByContractId(contractId: number) {
+    console.log(`contractId`, contractId)
     return this.connection
       .createQueryBuilder()
       .select('contractNumber.id')

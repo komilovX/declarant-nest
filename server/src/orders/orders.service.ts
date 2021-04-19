@@ -3,17 +3,25 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { User } from 'src/auth/user.entity'
 import { DatabaseService } from 'src/database/database.service'
 import { DocumentType } from 'src/document-type/document-type.entity'
+import { DocumentPrice } from 'src/documents/document-price.entity'
 import { Document } from 'src/documents/document.entity'
+import { NotificationsService } from 'src/notifications/notifications.service'
 import { DocumentTypes } from 'src/utils/lib/types'
-import { Repository } from 'typeorm'
+import { notificationUtils } from 'src/utils/notification.util'
+import { Connection, Repository } from 'typeorm'
 import { OrderPrice } from './entities/order-price.entity'
+import { Order } from './entities/order.entity'
 import {
   CreateIncomingDocument,
   CreateOrderDto,
   FindOrderGridDto,
+  OrderPriceDto,
+  UpdateOrderDefaultItems,
   UpdateOrderDto,
 } from './order.dto'
 import { OrdersRepository } from './orders.repository'
+
+const { orderGivenToYou } = notificationUtils
 
 @Injectable()
 export class OrdersService {
@@ -28,7 +36,11 @@ export class OrdersService {
     private documentRepository: Repository<Document>,
     @InjectRepository(OrderPrice)
     private orderPriceRepository: Repository<OrderPrice>,
+    @InjectRepository(DocumentPrice)
+    private documentPriceRepository: Repository<DocumentPrice>,
     private databaseService: DatabaseService,
+    private notificationService: NotificationsService,
+    private connection: Connection,
   ) {}
 
   findOrdersByGrid(
@@ -52,6 +64,7 @@ export class OrdersService {
       shipperId,
       clientId,
       productId,
+      clientDirectorId,
       documents: incomingDocuments,
       ...otherOrderDatas
     } = createOrderDto
@@ -65,6 +78,15 @@ export class OrdersService {
     const client = await this.databaseService.clientRepository.findOne(clientId)
     if (!client) {
       throw new NotFoundException(`client with id #${clientId} not found`)
+    }
+
+    const clientDirector = await this.databaseService.clientDirectorRepository.findOne(
+      clientDirectorId,
+    )
+    if (!clientDirector) {
+      throw new NotFoundException(
+        `Client Director with id #${clientDirector} not found`,
+      )
     }
 
     const product = await this.databaseService.productRepository.findOne(
@@ -83,6 +105,7 @@ export class OrdersService {
       user,
       declarant,
       client,
+      clientDirector,
       product,
       shipper,
       orderPrice: this.orderPriceRepository.create(),
@@ -97,6 +120,10 @@ export class OrdersService {
     })
     order.documents = preloadedDocuments
 
+    this.notificationService.createNotification(
+      orderGivenToYou(user.name, order.id),
+      [user.id, +declarantId],
+    )
     return this.orderRepository.save(order)
   }
 
@@ -106,6 +133,7 @@ export class OrdersService {
       shipperId,
       clientId,
       productId,
+      clientDirectorId,
       ...otherData
     } = updateOrderDto
     const order = await this.orderRepository.findOne(id)
@@ -126,6 +154,15 @@ export class OrdersService {
       throw new NotFoundException(`client with id #${clientId} not found`)
     }
 
+    const clientDirector = await this.databaseService.clientDirectorRepository.findOne(
+      clientDirectorId,
+    )
+    if (!clientDirector) {
+      throw new NotFoundException(
+        `Client Director with id #${clientDirector} not found`,
+      )
+    }
+
     const product = await this.databaseService.productRepository.findOne(
       productId,
     )
@@ -143,6 +180,7 @@ export class OrdersService {
       id,
       shipper,
       client,
+      clientDirector,
       product,
       declarant,
       ...otherData,
@@ -151,10 +189,59 @@ export class OrdersService {
     return this.orderRepository.save(newOrder)
   }
 
-  async findOrderByIdWithDetails(id: number) {
-    const order = await this.orderRepository.findOne(id, {
-      relations: ['documents', 'orderPrice'],
+  async updateSecondaryItems(
+    id: number,
+    updateOrderDefaultItems: UpdateOrderDefaultItems,
+  ) {
+    const order = await this.orderRepository.preload({
+      id,
+      ...updateOrderDefaultItems,
     })
+    if (!order) {
+      throw new NotFoundException(`Order with id #${id} is not found`)
+    }
+    return this.orderRepository.save(order)
+  }
+
+  async updateOrderPrice(id: number, orderPriceDto: OrderPriceDto) {
+    const order = await this.orderRepository.preload({ id })
+    if (!order) {
+      throw new NotFoundException(`Order with id ${id} is not found`)
+    }
+
+    const orderPrice = await this.orderPriceRepository.preload(orderPriceDto)
+    if (!orderPrice) {
+      throw new NotFoundException(
+        `Order with id ${orderPriceDto.id} is not found`,
+      )
+    }
+
+    order.orderPrice = orderPrice
+    return this.orderRepository.save(order)
+  }
+
+  async findOrderByIdWithDetails(id: number, declarant: any) {
+    let order: Order
+    if (declarant) {
+      order = await this.connection
+        .createQueryBuilder()
+        .select('order')
+        .from(Order, 'order')
+        .leftJoinAndSelect('order.documents', 'documents')
+        .leftJoinAndSelect('order.shipper', 'shipper')
+        .leftJoinAndSelect('order.client', 'client')
+        .leftJoinAndSelect('order.declarant', 'declarant')
+        .leftJoinAndSelect('order.product', 'product')
+        .leftJoinAndSelect('documents.declarant', 'manager')
+        .leftJoinAndSelect('documents.documentType', 'documentType')
+        .leftJoinAndSelect('documents.creator', 'creator')
+        .where('order.id = :id', { id })
+        .getOne()
+    } else {
+      order = await this.orderRepository.findOne(id, {
+        relations: ['documents', 'orderPrice'],
+      })
+    }
 
     if (!order) {
       throw new NotFoundException(`Order with id=${id} is not found`)
@@ -178,6 +265,10 @@ export class OrdersService {
     return { documents: incomingDocuments, order: orderDetails }
   }
 
+  findOrderByUserDocument(id: number, user: User) {
+    return this.orderRepository.findOrderByUserDocument(id, user)
+  }
+
   private async preloadDocuments(
     documents: CreateIncomingDocument[],
     files: Express.Multer.File[],
@@ -192,23 +283,34 @@ export class OrdersService {
             `DocumentType with id #${document.documentTypeId} not found`,
           )
         }
-        const documentFiles = files
-          .filter((file) => {
-            return (
-              `${documentType.number}` ===
-              file.originalname.slice(0, file.originalname.indexOf('-'))
-            )
-          })
-          .map((f) => f.filename)
+        const documentFiles = !files
+          ? []
+          : files
+              .filter((file) => {
+                return (
+                  `${documentType.number}` ===
+                  file.originalname.slice(0, file.originalname.indexOf('-'))
+                )
+              })
+              .map((f) => f.filename)
 
-        return this.documentRepository.create({
+        const newDocument = this.documentRepository.create({
           files: documentFiles,
-          price: document.price,
-          currency: document.currency,
           number: document.number,
           type: DocumentTypes.INCOMING,
           documentType,
         })
+
+        if (document.price) {
+          newDocument.price = [
+            this.documentPriceRepository.create({
+              price: document.price,
+              currency: document.currency,
+            }),
+          ]
+        }
+
+        return newDocument
       }),
     )
   }

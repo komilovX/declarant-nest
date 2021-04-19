@@ -176,21 +176,41 @@ export default {
         console.log(error)
       }
     },
-    async deleteContractNumber(node, data) {
-      try {
-        await this.contractStore.deleteContractNumber(data.id)
-        this.$refs.tree.remove(node)
-      } catch (error) {
-        console.log(error)
-      }
+    deleteContractNumber(node, data) {
+      this.$confirm('Уверены, что хотите удалить этот файл?', 'Подтверждение', {
+        confirmButtonText: 'Да',
+        cancelButtonText: 'Отменить',
+        type: 'warning',
+      })
+        .then(async () => {
+          try {
+            await this.contractStore.deleteContractNumber(data.id)
+            this.$refs.tree.remove(node)
+          } catch (error) {
+            console.log(error)
+          }
+        })
+        .catch(() => {})
     },
-    async deleteContractFile(node, data) {
-      try {
-        await this.contractStore.deleteContractFile(data.id)
-        this.$refs.tree.remove(node)
-      } catch (error) {
-        console.log(error)
-      }
+    deleteContractFile(node, data) {
+      this.$confirm(
+        'Уверены, что хотите удалить этот номер?',
+        'Подтверждение',
+        {
+          confirmButtonText: 'Да',
+          cancelButtonText: 'Отменить',
+          type: 'warning',
+        }
+      )
+        .then(async () => {
+          try {
+            await this.contractStore.deleteContractFile(data.id)
+            this.$refs.tree.remove(node)
+          } catch (error) {
+            console.log(error)
+          }
+        })
+        .catch(() => {})
     },
     async addContractFile(data, node) {
       if (this.file) {
@@ -256,7 +276,6 @@ export default {
         const contract = await this.$axios.$get(
           `/contract?contractId=${contractId}`
         )
-        console.log('contract', contract)
         const numbers = contract.map((data) => {
           return {
             name: data.number,

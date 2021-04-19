@@ -41,6 +41,38 @@ class Data extends VuexModule {
   }
 
   @Mutation
+  addClientDirector(id: number) {
+    const client = this.clients.find((r) => r.id === id)
+    if (client) {
+      client.directors.push({ name: '' })
+    }
+  }
+
+  @Mutation
+  deleteClientDirector({ id, index }: { id: number; index: number }) {
+    const client = this.clients.find((r) => r.id === id)
+    if (client) {
+      client.directors.splice(index, 1)
+    }
+  }
+
+  @Mutation
+  editClientDirector({
+    id,
+    index,
+    value,
+  }: {
+    id: number
+    index: number
+    value: any
+  }) {
+    const client = this.clients.find((r) => r.id === id)
+    if (client) {
+      client.directors[index].name = value
+    }
+  }
+
+  @Mutation
   deleteClient(id: number) {
     this.clients = this.clients.filter((d) => d.id !== id)
   }

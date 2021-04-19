@@ -19,11 +19,6 @@ export default {
   data: () => {
     return {
       order_id: 0,
-      newDeclarant: '',
-      isChatOpen: false,
-      messages: [],
-      participants: [],
-      chatLoading: false,
     }
   },
   computed: {
@@ -86,6 +81,7 @@ export default {
           field: 'status',
           sortable: false,
           noSearch: true,
+          width: 170,
           suppressFilterButton: true,
           cellRendererFramework: OrderStatus,
           floatingFilterComponent: 'dropdownFilter',
@@ -101,6 +97,7 @@ export default {
           noSearch: true,
           filter: false,
           sortable: false,
+          width: 110,
           cellRendererFramework: ActionRenderer,
           cellRendererParams: {
             showView: true,
@@ -119,78 +116,10 @@ export default {
   methods: {
     async fetchData(queryData) {
       try {
-        return await this.$axios.$post('/orders/grid', queryData)
+        return await this.$axios.$post('/orders/grid?archived=true', queryData)
       } catch (error) {
         console.log(error)
       }
-    },
-    async fetchMessages(id) {
-      try {
-        this.chatLoading = true
-        let messages = await this.$axios.$get(`api/message/${id}`)
-        messages = messages.map((message) => {
-          if (this.user.userId == message.author) {
-            message.author = 'me'
-          }
-          return message
-        })
-        this.messages = messages
-        this.isChatOpen = true
-        this.chatLoading = false
-      } catch (error) {
-        this.chatLoading = false
-        throw error
-      }
-    },
-    statusFilterParams() {
-      return {
-        suppressFilterButton: true,
-        optionsLabel: 'Select',
-        options: Object.keys(this.statuses).map((key) => ({
-          value: key,
-          key: this.statuses[key],
-        })),
-      }
-    },
-    changeOrderStatus(index) {
-      this.orders[index].archived = true
-    },
-    filterTag(value, row) {
-      return row.status === value
-    },
-    async updateDeclarant(currentDeclarant, index) {
-      try {
-        const { id } = this.declarants.find(
-          ({ name }) => name === currentDeclarant
-        )
-        const formData = {
-          id: this.orders[index].id,
-          declarant: currentDeclarant,
-          declarant_id: id,
-        }
-        await this.$store.dispatch('orders/updateOrder', formData)
-        this.$message.success('Oбнавлена')
-        this.orders[index].archived = false
-      } catch (error) {
-        console.log(error)
-      }
-    },
-    deleteOrder(row) {
-      const text = 'Уверены, что хотите удалить этого заявка?'
-      this.$confirm(text, 'Подтверждение', {
-        confirmButtonText: 'Да',
-        cancelButtonText: 'Отменить',
-        type: 'warning',
-      })
-        .then(async () => {
-          try {
-            await this.$axios.$put(`api/orders/${row.id}/delete`)
-            this.orders = this.orders.filter(({ id }) => id != row.id)
-          } catch (e) {
-            console.log(e)
-          }
-        })
-        .catch(() => {})
     },
   },
 }

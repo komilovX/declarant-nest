@@ -19,7 +19,7 @@ export default {
     '@/plugins/axios-accessor.ts',
     '@/plugins/nuxt-client-init.ts',
     '@/plugins/beautiful-chat',
-    '@/utils/imgDirective.ts',
+    '@/utils/directive.ts',
     '@/utils/filters.ts',
   ],
 

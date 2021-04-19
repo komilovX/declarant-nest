@@ -120,3 +120,24 @@ export const currencyList = [
   { type: 'сум', value: 'sum' },
   { type: 'перечисление', value: 'invoice' },
 ]
+
+export enum DocumentStatus {
+  NEW = 'NEW',
+  TASK = 'TASK',
+  DONE = 'DONE',
+  RETURNED = 'RETURNED',
+  FINISHED = 'FINISHED',
+}
+
+export const documentStatusTexts: any = {
+  [DocumentStatus.TASK]: 'В процессе',
+  [DocumentStatus.DONE]: 'Дано',
+  [DocumentStatus.RETURNED]: 'Вернулся',
+  [DocumentStatus.FINISHED]: 'Готово',
+}
+export const documentStatusColors: any = {
+  TASK: 'danger',
+  DONE: 'primary',
+  RETURNED: 'info',
+  FINISHED: 'success',
+}

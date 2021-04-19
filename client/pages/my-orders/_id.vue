@@ -14,7 +14,7 @@
             <template slot="title">
               <h3 class="mr1 text-base font-medium">Детали</h3>
             </template>
-            <order-info :order="order" />
+            <order-info :order="order" :select="true" />
           </el-collapse-item>
         </el-collapse>
       </el-col>
@@ -41,7 +41,6 @@
             <decorated-document
               :decorated-documents="decoratedDocuments"
               :order_id="Number($route.params.id)"
-              :documentTpes="decoratedDocumentTypes"
               @delete-document="deleteDecoratedDocument($event)"
               @decoratedDocumentAdded="documents.push($event)"
             />
@@ -54,7 +53,43 @@
             Необходимые Услуги, Документы
           </h4>
         </div>
-        <declarant-task-form />
+        <declarant-task-form
+          :orderId="order.id"
+          :documents="declarantDocumentTypes"
+          @documentAdded="documents.push($event)"
+        />
+        <div class="bg-white">
+          <div
+            class="mt-2 p-2 bg-white flex justify-between items-center inline-block"
+          >
+            <order-task-statuses />
+            <el-button type="text" @click="contractDialog = true"
+              >Контракты</el-button
+            >
+          </div>
+          <update-declarant-task
+            :visible="updateDialog"
+            :documents="declarantDocumentTypes"
+            :document="changedDocument"
+            :orderId="order.id"
+            :onClose="() => (updateDialog = false)"
+            @documentUpdated="documentUpdated"
+          />
+        </div>
+
+        <declarant-task-table
+          :documents="declarantDocuments"
+          :orderId="order.id"
+          @deleteDocument="deleteDocument($event)"
+          @updateDocument="openUpdateDialog($event)"
+          @documentUpdated="documentUpdated($event)"
+        />
+        <order-contracts
+          :visible="contractDialog"
+          :on-close="() => (contractDialog = false)"
+          :clientId="order.client.id"
+          :shipperId="order.shipper.id"
+        />
       </el-col>
     </el-row>
   </div>
@@ -68,10 +103,14 @@ import {
   ordersStore,
   userStore,
   documentsStore,
+  authStore,
 } from '~/store'
 import { DocumenTypes } from '~/utils/enums'
 import DecoratedDocument from '~/components/OrderComponents/DecoratedDocument.vue'
 import DeclarantTaskForm from '~/components/OrderComponents/DeclarantTaskForm.vue'
+import DeclarantTaskTable from '~/components/OrderComponents/DeclarantTaskTable.vue'
+import UpdateDeclarantTask from '~/components/DialogComponents/UpdateDeclarantTask.vue'
+import OrderTaskStatuses from '~/components/OrderComponents/OrderTaskStatuses.vue'
 
 export default {
   components: {
@@ -79,14 +118,20 @@ export default {
     AdminFileTable,
     DecoratedDocument,
     DeclarantTaskForm,
+    DeclarantTaskTable,
+    UpdateDeclarantTask,
+    OrderTaskStatuses,
   },
-  async asyncData({ route }) {
+  async asyncData({ route, error }) {
     try {
       const {
-        documents,
+        documents = [],
         orderPrice,
         ...order
-      } = await ordersStore.findOrderByIdWithDetails(route.params.id)
+      } = await ordersStore.findOrderByIdWithDetailsForDeclarant(
+        route.params.id,
+        'declarant'
+      )
       if (!documentTypeStore.documentTypes.length) {
         await documentTypeStore.fetchDocumentTypes()
       }
@@ -94,8 +139,8 @@ export default {
         await userStore.fetchUsers()
       }
       return { order, documents, orderPrice }
-    } catch (error) {
-      console.log(error)
+    } catch (err) {
+      error(err)
     }
   },
   data() {
@@ -103,6 +148,8 @@ export default {
       documentTypeStore,
       documentsStore,
       changedDocument: {},
+      updateDialog: false,
+      contractDialog: false,
     }
   },
   computed: {
@@ -112,79 +159,39 @@ export default {
     decoratedDocuments() {
       return this.documents.filter((doc) => doc.type === DocumenTypes.DECORATED)
     },
-    decoratedDocumentTypes() {
-      return this.documentTypeStore.documentTypes.filter((doc) =>
-        doc.types.includes(DocumenTypes.DECORATED)
+    declarantDocuments() {
+      return this.documents.filter(
+        (doc) =>
+          doc.type === DocumenTypes.DECLARANT &&
+          doc.creator?.id === authStore.user.id
+      )
+    },
+    declarantDocumentTypes() {
+      return this.documentTypeStore.documentTypes.filter(
+        (doc) =>
+          doc.types.includes(DocumenTypes.DECLARANT) ||
+          doc.types.includes(DocumenTypes.SERVICE)
       )
     },
   },
   methods: {
-    documentAdded({ document, type }) {
-      if (type == 'document') {
-        this.declarant_documents.push(document)
-      } else {
-        this.services.push(document)
-      }
-      this.documentDialog = false
-    },
     openUpdateDialog(row) {
       this.changedDocument = row
       this.updateDialog = true
     },
-    async deleteDclarantFile({ id, file }) {
-      try {
-        await this.$store.dispatch('orders/deleteDeclarantDocumentFile', {
-          id,
-          file,
-        })
-        const index = this.declarant_documents.findIndex((d) => d.id == id)
-        let files = JSON.parse(this.declarant_documents[index].files)
-        files = JSON.stringify(files.filter((f) => f !== file))
-        this.changedDocument.files = this.changedDocument.files.filter(
-          (f) => f !== file
-        )
-        this.declarant_documents[index].files = files
-      } catch (e) {
-        console.log(e)
-      }
-    },
-    onDocumentUpdated({ document, type }) {
-      if (type === 'document') {
-        const index = this.declarant_documents.findIndex(
-          (d) => d.id == document.id
-        )
-        this.declarant_documents[index] = document
-      } else {
-        const index = this.services.findIndex((d) => d.id == document.id)
-        this.services[index] = document
-      }
-      this.updateDialog = false
-    },
-    async deleteDocument({ id, type }) {
-      try {
-        if (type === 'declarant') {
-          await this.$store.dispatch('orders/deleteDeclarantDocument', id)
-          this.declarant_documents = this.declarant_documents.filter(
-            (d) => d.id != id
-          )
-        } else {
-          await this.$axios.$delete(`api/service/${id}`)
-          this.services = this.services.filter((f) => f.id != id)
-        }
+    documentUpdated(document) {
+      const index = this.documents.findIndex((d) => d.id === document.id)
+      if (index !== -1) {
+        this.documents.splice(index, 1, document)
         this.updateDialog = false
-        this.$message.success('Документ успешно удален')
-      } catch (e) {
-        console.log(e)
       }
     },
-    async changeOrderStatus() {
+    async deleteDocument(id) {
       try {
-        await this.$axios.$put(`api/orders/${this.order.id}/archive`)
-        this.$router.push('/orders')
-      } catch (e) {
-        this.finishLoading = false
-        console.log(e)
-      }
+        await documentsStore.deleteDocument(id)
+        this.$message.success('Документ успешна удалена')
+        this.documents = this.documents.filter((doc) => doc.id != id)
+      } catch (e) {}
     },
   },
 }
@@ -192,24 +199,5 @@ export default {
 <style>
 .el-collapse-item__content {
   padding-bottom: 0px !important;
-}
-</style>
-<style lang="scss" scoped>
-.cubics {
-  padding: 5px;
-  [class$='-row'] {
-    width: 20px;
-    height: 20px;
-    margin: 0 8px;
-  }
-  .service-row {
-    background-color: rgba(252, 0, 0, 0.3);
-  }
-  .declarant-row {
-    background-color: rgba(1, 69, 255, 0.3);
-  }
-  .task-row {
-    background-color: rgba(248, 232, 85, 0.5);
-  }
 }
 </style>

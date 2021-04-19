@@ -14,21 +14,21 @@
         <td>
           <span v-for="(p, ind) in document.price" :key="ind">
             <span v-if="p.currency === 'sum'">
-              {{ numberFormatter(p.price) }}
+              {{ p.price | numberFormatter) }}
             </span>
           </span>
         </td>
         <td>
           <span v-for="(p, ind) in document.price" :key="ind">
             <span v-if="p.currency === '$'">
-              {{ numberFormatter(p.price) }}
+              {{ p.price | numberFormatter }}
             </span>
           </span>
         </td>
         <td>
           <span v-for="(p, ind) in document.price" :key="ind">
             <span v-if="p.currency === 'invoice'">
-              {{ numberFormatter(p.price) }}
+              {{ p.price | numberFormatter }}
             </span>
           </span>
         </td>
@@ -73,8 +73,7 @@ export default {
 </script>
 <style>
 .printArea {
-  visibility: hidden;
-  height: 0;
+  display: none;
 }
 @media print {
   body * {
@@ -82,6 +81,7 @@ export default {
   }
   .printArea {
     visibility: visible;
+    display: block;
     background-color: white;
     min-height: 100vh;
     width: 100%;

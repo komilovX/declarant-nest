@@ -2,8 +2,7 @@ import { User } from 'src/auth/user.entity'
 import {
   Column,
   Entity,
-  JoinTable,
-  ManyToMany,
+  JoinColumn,
   OneToMany,
   PrimaryGeneratedColumn,
   Unique,
@@ -25,12 +24,10 @@ export class Role {
   @Column({ nullable: true })
   description: string
 
-  @JoinTable()
-  @ManyToMany(() => Page, (page) => page.roles, {
+  @JoinColumn()
+  @OneToMany(() => Page, (page) => page.roles, {
     cascade: true,
-    eager: true,
-    onDelete: 'SET NULL',
-    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
   })
   pages: Page[]
 

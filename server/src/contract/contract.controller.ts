@@ -43,6 +43,14 @@ export class ContractController {
     return this.contractService.findAllContracts()
   }
 
+  @Get('/orders')
+  findContractsForOrder(
+    @Query('clientId') clientId: number,
+    @Query('shipperId') shipperId: number,
+  ) {
+    return this.contractService.findAllContractsForOrder(clientId, shipperId)
+  }
+
   @Put('/number/:id')
   addNumberContract(@Body('number') number: string, @Param('id') id: number) {
     return this.contractService.addNumberContract(id, number)
