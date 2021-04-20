@@ -73,7 +73,7 @@
   </el-dialog>
 </template>
 
-<script lang="ts">
+<script>
 import { mapRulesByValue } from '@/utils/form-rules.js'
 import { contractStore } from '~/store'
 
@@ -116,12 +116,12 @@ export default {
     }
   },
   methods: {
-    submitClientForm(formName: string) {
-      ;(this.$refs[formName] as any).validate(async (valid: boolean) => {
+    submitClientForm(formName) {
+      this.$refs[formName].validate(async (valid) => {
         if (valid) {
           try {
             await this.contractStore.addContract(this.contractForm)
-            ;(this.$refs[formName] as any).resetFields()
+            this.$refs[formName].resetFields()
             this.$message.success('Контракт успешно добавлен')
           } catch (e) {}
         } else {

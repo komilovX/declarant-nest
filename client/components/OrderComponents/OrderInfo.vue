@@ -41,7 +41,7 @@
   </ul>
 </template>
 <script>
-import OrderStatus from './OrderStatus.vue'
+import OrderStatus from './OrderStatusTag.vue'
 import { authStore } from '~/store'
 
 export default {
