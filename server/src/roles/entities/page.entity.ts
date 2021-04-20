@@ -21,6 +21,6 @@ export class Page {
   @Column({ default: false })
   update: boolean
 
-  @ManyToOne(() => Role, (role) => role.pages)
+  @ManyToOne(() => Role, (role) => role.pages, { onDelete: 'CASCADE' })
   roles: Role
 }
