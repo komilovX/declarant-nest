@@ -15,16 +15,25 @@ export class OrdersRepository extends Repository<Order> {
   ) {
     const { filter, sort, limit, page = 1 } = findOrderGridDto
     const { deleted, archived } = query
-
     const filterColumns = {}
     Object.keys(filter).forEach((key) => {
-      if (!isNaN(filter[key])) {
-        filterColumns[key] = Raw(
-          (alias) => `CAST(${alias} AS VARCHAR(9)) LIKE '%${filter[key]}%'`,
-        )
-      } else {
-        filterColumns[key] = Like(`%${filter[key]}%`)
+      switch (key) {
+        case 'user':
+          filterColumns['user'] = { id: filter[key] }
+          return
+        case 'client':
+          filterColumns['client'] = { id: filter[key] }
+          return
+        case 'shipper':
+          filterColumns['shipper'] = { id: filter[key] }
+          return
+        default:
+          filterColumns[key] = Raw(
+            (alias) => `CAST(${alias} AS VARCHAR(30)) LIKE '%${filter[key]}%'`,
+          )
+          break
       }
+      //   filterColumns[key] = Like(`%${filter[key]}%`)
     })
     let conditions
 
@@ -34,7 +43,11 @@ export class OrdersRepository extends Repository<Order> {
         { deleted: true, ...filterColumns },
       ]
     } else {
-      conditions = { deleted: false, archived: false, ...filterColumns }
+      conditions = {
+        deleted: false,
+        archived: false,
+        ...filterColumns,
+      }
     }
     return this.findAndCount({
       where: conditions,
@@ -49,10 +62,36 @@ export class OrdersRepository extends Repository<Order> {
 
     const filterColumns = {}
     Object.keys(filter).forEach((key) => {
-      filterColumns[key] = Like(`%${filter[key]}%`)
+      switch (key) {
+        case 'user':
+          filterColumns['user'] = { id: filter[key] }
+          return
+        case 'declarant':
+          filterColumns['declarant'] = { id: filter[key] }
+          return
+        case 'client':
+          filterColumns['client'] = { id: filter[key] }
+          return
+        case 'shipper':
+          filterColumns['shipper'] = { id: filter[key] }
+          return
+        case 'product':
+          filterColumns['product'] = { id: filter[key] }
+          return
+        default:
+          filterColumns[key] = Raw(
+            (alias) => `CAST(${alias} AS VARCHAR(30)) LIKE '%${filter[key]}%'`,
+          )
+          break
+      }
+      //   filterColumns[key] = Like(`%${filter[key]}%`)
     })
 
-    const conditions = { declarantId: user.id, ...filterColumns }
+    const conditions = {
+      declarantId: user.id,
+      archived: false,
+      ...filterColumns,
+    }
 
     return this.findAndCount({
       where: conditions,

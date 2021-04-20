@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { User } from 'src/auth/user.entity'
 import { getRepository, Repository } from 'typeorm'
@@ -43,13 +43,14 @@ export class NotificationsService {
   }
 
   async changeToRead(id: number, user: User) {
-    const notification = await this.userNotificationRepository.update(
-      { isRead: true },
-      {
-        userId: user.id,
-        notificationId: id,
-      },
-    )
-    return notification
+    const notification = await this.userNotificationRepository.findOne({
+      userId: user.id,
+      notificationId: id,
+    })
+    if (!notification) {
+      throw new NotFoundException(`Notification not found`)
+    }
+    notification.isRead = true
+    return this.userNotificationRepository.save(notification)
   }
 }

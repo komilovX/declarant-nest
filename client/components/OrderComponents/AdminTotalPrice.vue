@@ -3,13 +3,28 @@
     <div class="inputs flex">
       <div class="flex mr-2">
         <label for="kurs" class="font-medium">Курс: </label>
-        <el-input id="kurs" v-model="course" size="mini" type="number" />
+        <el-input
+          v-if="!archived"
+          id="kurs"
+          v-model="course"
+          size="mini"
+          type="number"
+        />
+        <span v-else>{{ course }}</span>
       </div>
       <div class="flex mr-2">
         <label for="persent" class="font-medium">Коефициент: </label>
-        <el-input id="persent" v-model="percent" size="mini" type="number" />
+        <el-input
+          v-if="!archived"
+          id="persent"
+          v-model="percent"
+          size="mini"
+          type="number"
+        />
+        <span v-else>{{ percent }}</span>
       </div>
       <el-button
+        v-if="!archived"
         type="primary"
         size="mini"
         icon="el-icon-refresh"
@@ -33,11 +48,17 @@
         <td>{{ price.dollar | numberFormatter }}</td>
         <td>{{ invoice | numberFormatter }}</td>
       </tr>
-      <tr>
+      <tr v-if="!archived">
         <th>Приход</th>
         <td><el-input v-model="comingSum" size="mini" type="number" /></td>
         <td><el-input v-model="comingDollar" size="mini" type="number" /></td>
         <td><el-input v-model="comingInvoice" size="mini" type="number" /></td>
+      </tr>
+      <tr v-else>
+        <th>Приход</th>
+        <td>{{ comingSum | numberFormatter }}</td>
+        <td>{{ comingDollar | numberFormatter }}</td>
+        <td>{{ comingInvoice | numberFormatter }}</td>
       </tr>
       <tr>
         <th>Сальдо</th>
@@ -71,6 +92,10 @@ export default {
     order_id: {
       type: [Number, String],
       required: true,
+    },
+    archived: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {

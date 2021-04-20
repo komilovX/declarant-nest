@@ -1,7 +1,7 @@
 <template>
   <el-row>
     <el-col :span="16" :sm="24" :md="16">
-      <div class="mb-1 df">
+      <div v-role:create="'data-products'" class="mb-1 df">
         <app-input
           :value="name"
           style="max-width: 80%"
@@ -24,6 +24,7 @@
         <app-table-column label="Действия">
           <template #default="{ row: { id, changed }, index }">
             <app-table-actions
+              v-role:update="'data-products'"
               :changed="changed"
               @on-changed="products[index].changed = true"
               @on-cancel="products[index].changed = false"
@@ -42,7 +43,7 @@ import AppInput from '~/components/AppComponents/AppInput.vue'
 import AppInputRow from '~/components/AppComponents/AppInputRow.vue'
 import AppTableActions from '~/components/AppComponents/AppTableActions.vue'
 import AppTableColumn from '~/components/AppComponents/AppTableColumn.vue'
-import { dataStore } from '~/store'
+import { authStore, dataStore } from '~/store'
 
 export default {
   components: {
@@ -51,6 +52,17 @@ export default {
     AppTableColumn,
     AppInputRow,
     AppTableActions,
+  },
+  validate() {
+    const pages = authStore.user?.role.pages
+    if (pages) {
+      const page = pages.find((p) => p.value === 'data-products')
+      if (page) {
+        return true
+      }
+      return false
+    }
+    return false
   },
   data() {
     return {

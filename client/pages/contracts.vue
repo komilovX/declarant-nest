@@ -1,14 +1,15 @@
 <template>
   <div>
-    <app-header header-text="Контракты" @on-click="openContractDialog" />
-    <el-card class="w-full">
-      <el-input
-        v-model="filterText"
+    <div class="flex items-center">
+      <h2 class="mr-2 text-lg font-medium">Контракты</h2>
+      <app-add-button
+        v-role:create="'contracts'"
         size="small"
-        placeholder="Filter keyword"
-        class="md:w-1/2 sm:w-full"
+        @on-click="openContractDialog"
       />
-
+    </div>
+    <hr class="my-2" />
+    <el-card class="w-full">
       <el-tree
         ref="tree"
         class="mt-4"
@@ -30,7 +31,10 @@
                     class="mb-2"
                     type="text"
                   />
-                  <app-add-button @on-click="addContractNumber(data, node)" />
+                  <app-add-button
+                    v-role:create="'contracts'"
+                    @on-click="addContractNumber(data, node)"
+                  />
                 </div>
                 <el-button slot="reference" type="text" size="mini">
                   Добавить
@@ -55,13 +59,17 @@
                       >Загрузить файл</el-button
                     >
                   </el-upload>
-                  <app-add-button @on-click="addContractFile(data, node)" />
+                  <app-add-button
+                    v-role:create="'contracts'"
+                    @on-click="addContractFile(data, node)"
+                  />
                 </div>
                 <el-button slot="reference" type="text" size="mini">
                   Добавить
                 </el-button>
               </el-popover>
               <el-button
+                v-role:delete="'contracts'"
                 type="text"
                 size="mini"
                 @click="() => deleteContractNumber(node, data)"
@@ -79,6 +87,7 @@
                 </a>
               </span>
               <el-button
+                v-role:delete="'contracts'"
                 type="text"
                 size="mini"
                 @click="() => deleteContractFile(node, data)"
@@ -104,12 +113,22 @@
 
 <script>
 import AppAddButton from '~/components/AppComponents/AppAddButton.vue'
-import AppHeader from '~/components/AppComponents/AppHeader.vue'
 import CreateContractDialog from '~/components/DialogComponents/CreateContractDialog.vue'
-import { dataStore, documentTypeStore, contractStore } from '~/store'
+import { dataStore, documentTypeStore, contractStore, authStore } from '~/store'
 
 export default {
-  components: { AppHeader, CreateContractDialog, AppAddButton },
+  components: { CreateContractDialog, AppAddButton },
+  validate() {
+    const pages = authStore.user?.role.pages
+    if (pages) {
+      const page = pages.find((p) => p.value === 'contracts')
+      if (page) {
+        return true
+      }
+      return false
+    }
+    return false
+  },
   data() {
     return {
       dataStore,
@@ -133,7 +152,6 @@ export default {
       this.$refs.tree.filter(val)
     },
   },
-
   methods: {
     filterNode(value, data) {
       if (!value) return true

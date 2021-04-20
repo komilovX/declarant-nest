@@ -69,12 +69,10 @@
             <h4 class="text-center text-lg font-medium mr-4">
               Ваши документы и услуги
             </h4>
-            <app-add-button @on-click="documentDialog = true" />
           </div>
           <admin-personal-table
             :documents="adminPersonalDocuments"
-            @updateDocument="openUpdateDialog($event)"
-            @deleteDocument="deleteDocument($event)"
+            :button="!order.deleted && !order.archived"
           />
         </div>
         <admin-total-price
@@ -83,15 +81,10 @@
           :price="totalPrice"
           :order_id="order.id"
           :price_info="orderPrice"
+          :archived="true"
         />
-        <div v-role:update="'orders'" class="flex mt-2">
-          <el-button
-            v-if="serviceList.length > 0"
-            size="small"
-            type="primary"
-            plain
-            @click="printDocument"
-          >
+        <div v-role:update="'archive'" class="flex mt-2">
+          <el-button size="small" type="primary" plain @click="printDocument">
             Печатать
           </el-button>
           <el-button
@@ -100,8 +93,9 @@
             type="success"
             :loading="finishLoading"
             @click="changeOrderStatus"
-            >Закончить</el-button
           >
+            Восстановить
+          </el-button>
         </div>
         <convert-order-pdf
           id="print-area"
@@ -112,22 +106,6 @@
         />
       </el-col>
     </el-row>
-    <CreateOrderDocument
-      :visible="documentDialog"
-      :documents="documentTypeStore.documentTypes"
-      :order_id="order.id"
-      :on-close="() => (documentDialog = false)"
-      @documentAdded="documents.push($event)"
-    />
-    <update-manager-task
-      :visible="updateDialog"
-      :document="changedDocument"
-      :orderId="order.id"
-      :onClose="() => (updateDialog = false)"
-      @fileAdded="fileAdded($event)"
-      @fileRemoved="fileRemoved($event)"
-      @documentUpdated="documentUpdated"
-    />
     <order-contracts
       :visible="contractDialog"
       :on-close="() => (contractDialog = false)"
@@ -139,19 +117,12 @@
 
 <script>
 import AdminTotalPrice from '@/components/OrderComponents/AdminTotalPrice.vue'
-import CreateOrderDocument from '@/components/DialogComponents/CreateOrderDocument.vue'
 import OrderInfo from '~/components/OrderComponents/OrderInfo.vue'
 import AdminFileTable from '~/components/OrderComponents/AdminFileTable.vue'
-import AppAddButton from '~/components/AppComponents/AppAddButton.vue'
 import AdminInfoTable from '~/components/OrderComponents/AdminInfoTable.vue'
 import ConvertOrderPdf from '~/components/OrderComponents/ConvertOrderPdf.vue'
 
-import {
-  authStore,
-  documentsStore,
-  documentTypeStore,
-  ordersStore,
-} from '~/store'
+import { authStore, documentTypeStore, ordersStore } from '~/store'
 import { DocumenTypes } from '~/utils/enums'
 import OrderTaskStatuses from '~/components/OrderComponents/OrderTaskStatuses.vue'
 import AdminPersonalTable from '~/components/OrderComponents/AdminPersonalTable.vue'
@@ -160,9 +131,7 @@ import { DocumentStatus } from '~/utils/data'
 
 export default {
   components: {
-    CreateOrderDocument,
     OrderInfo,
-    AppAddButton,
     AdminTotalPrice,
     AdminInfoTable,
     AdminFileTable,
@@ -171,16 +140,10 @@ export default {
     AdminPersonalTable,
     OrderContracts,
   },
-  beforeRouteLeave(_to, _from, next) {
-    if (this.serviceList.length > 0) {
-      this.$refs.totalPriceRef.updateData()
-    }
-    next()
-  },
   validate() {
     const pages = authStore.user?.role.pages
     if (pages) {
-      const page = pages.find((p) => p.value === 'orders')
+      const page = pages.find((p) => p.value === 'archive')
       if (page) {
         return true
       }
@@ -207,10 +170,7 @@ export default {
     return {
       documentTypeStore,
       finishLoading: false,
-      documentDialog: false,
-      updateDialog: false,
       contractDialog: false,
-      changedDocument: {},
     }
   },
   computed: {
@@ -251,53 +211,16 @@ export default {
     },
   },
   methods: {
-    openUpdateDialog(row) {
-      this.changedDocument = row
-      this.updateDialog = true
-    },
     async changeOrderStatus() {
       try {
         await ordersStore.updateOrderItems({
           id: this.order.id,
-          data: { archived: true },
+          data: { archived: false },
         })
-        this.$router.push('/orders')
+        this.$router.push('/archive')
       } catch (e) {
         console.log(e)
       }
-    },
-    documentUpdated(document) {
-      const index = this.documents.findIndex((d) => d.id === document.id)
-      if (index !== -1) {
-        this.documents.splice(index, 1, document)
-        this.updateDialog = false
-      }
-    },
-    fileAdded(file) {
-      const document = this.documents.find(
-        (d) => d.id === this.changedDocument.id
-      )
-      if (document) {
-        document.files ? document.files.push(file) : (document.files = [file])
-      }
-    },
-    fileRemoved(file) {
-      const document = this.documents.find(
-        (d) => d.id === this.changedDocument.id
-      )
-      if (document) {
-        document.files = document.files.filter((f) => f !== file)
-      }
-    },
-    printDocument() {
-      this.$refs.converter.print()
-    },
-    async deleteDocument(id) {
-      try {
-        await documentsStore.deleteDocument(id)
-        this.$message.success('Документ успешна удалена')
-        this.documents = this.documents.filter((doc) => doc.id != id)
-      } catch (e) {}
     },
   },
 }

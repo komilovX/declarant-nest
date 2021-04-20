@@ -24,7 +24,7 @@
     </button>
     <div class="flex-1 px-4 flex justify-end">
       <h2 class="self-center text-lg">
-        {{ authStore && authStore.user.name }}
+        {{ authStore && authStore.user && authStore.user.name }}
       </h2>
       <div class="ml-4 flex items-center md:ml-6">
         <!-- Profile dropdown -->

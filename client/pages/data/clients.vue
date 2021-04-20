@@ -2,10 +2,13 @@
   <div>
     <el-row :gutter="20" class="p1">
       <el-col :span="24" :md="22" :sm="24">
-        <document-table-header
-          header-text="Клиенты"
-          @on-click="dialogVisible = true"
-        />
+        <div class="flex items-center mb-2">
+          <h4 class="mr-4">Клиенты</h4>
+          <app-add-button
+            v-role:create="'data-clients'"
+            @on-click="dialogVisible = true"
+          />
+        </div>
         <el-alert
           v-if="error"
           class="mb1"
@@ -90,6 +93,7 @@
           <app-table-column label="Действия">
             <template #default="{ row: { id, changed }, index }">
               <app-table-actions
+                v-role:update="'data-clients'"
                 :changed="changed"
                 @on-changed="clients[index].changed = true"
                 @on-cancel="clients[index].changed = false"
@@ -110,18 +114,29 @@
 <script>
 import ClientDialog from '@/components/DialogComponents/CreateClientDialog.vue'
 import AppTableActions from '~/components/AppComponents/AppTableActions.vue'
-import DocumentTableHeader from '~/components/AppComponents/DocumentTableHeader.vue'
 import AppTableColumn from '~/components/AppComponents/AppTableColumn.vue'
-import { dataStore } from '~/store'
+import { authStore, dataStore } from '~/store'
 import AppInputRow from '~/components/AppComponents/AppInputRow.vue'
+import AppAddButton from '~/components/AppComponents/AppAddButton.vue'
 
 export default {
   components: {
     ClientDialog,
     AppTableActions,
-    DocumentTableHeader,
     AppTableColumn,
     AppInputRow,
+    AppAddButton,
+  },
+  validate() {
+    const pages = authStore.user?.role.pages
+    if (pages) {
+      const page = pages.find((p) => p.value === 'data-clients')
+      if (page) {
+        return true
+      }
+      return false
+    }
+    return false
   },
   data() {
     return {

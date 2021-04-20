@@ -22,6 +22,9 @@ export class Document extends BaseEntity {
   @ManyToOne(() => Order, (order) => order.documents)
   order: Order
 
+  @Column({ nullable: true })
+  declarantId: number
+
   @JoinColumn()
   @ManyToOne(() => User, (user) => user.document, {
     eager: true,
@@ -36,7 +39,6 @@ export class Document extends BaseEntity {
   })
   creator: User
 
-  @JoinColumn()
   @ManyToOne(() => DocumentType, (documentType) => documentType.documents, {
     eager: true,
   })

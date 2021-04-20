@@ -75,7 +75,9 @@ export default {
           sortable: false,
           noSearch: true,
           suppressFilterButton: true,
-          cellRenderer: ({ value }) => value?.name,
+          cellRenderer: ({ value }) => {
+            return value?.name
+          },
           floatingFilterComponent: 'dropdownFilter',
           floatingFilterComponentParams: {
             suppressFilterButton: true,
@@ -84,6 +86,7 @@ export default {
               label: u.name,
               value: u.id,
             })),
+            onParentModelChanged: () => {},
           },
         },
         {
@@ -211,17 +214,7 @@ export default {
               that.fetchMessages(order.id)
             },
             deleteClicked(_id) {
-              this.$confirm(
-                'It will delete appointment. Continue?',
-                'Warning',
-                {
-                  confirmButtonText: 'OK',
-                  cancelButtonText: 'Cancel',
-                  type: 'warning',
-                }
-              )
-                .then(() => {})
-                .catch(() => {})
+              that.deleteOrder(_id)
             },
           },
         },
@@ -252,7 +245,7 @@ export default {
     filterTag(value, row) {
       return row.status === value
     },
-    deleteOrder(row) {
+    deleteOrder(id) {
       const text = 'Уверены, что хотите удалить этого заявка?'
       this.$confirm(text, 'Подтверждение', {
         confirmButtonText: 'Да',
@@ -261,8 +254,8 @@ export default {
       })
         .then(async () => {
           try {
-            await this.$axios.$put(`api/orders/${row.id}/delete`)
-            this.orders = this.orders.filter(({ id }) => id != row.id)
+            await this.$axios.$put(`api/orders/${id}/delete`)
+            this.orders = this.orders.filter((o) => o.id != id)
           } catch (e) {
             console.log(e)
           }

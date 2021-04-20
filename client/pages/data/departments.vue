@@ -2,7 +2,7 @@
   <div>
     <el-row :gutter="20" class="p1">
       <el-col :span="24" :md="16" :sm="24">
-        <div class="mb-2 flex items-center">
+        <div v-role:create="'data-departments'" class="mb-2 flex items-center">
           <app-input
             :value="name"
             class="mr-2 w-1 md:w-1/2"
@@ -24,6 +24,7 @@
           <el-table-column width="150" label="Удалить" align="center">
             <template slot-scope="{ row: { id } }">
               <el-button
+                v-role:update="'data-departments'"
                 type="danger"
                 plain
                 size="mini"
@@ -43,9 +44,20 @@
 <script>
 import AppAddButton from '~/components/AppComponents/AppAddButton.vue'
 import AppInput from '~/components/AppComponents/AppInput.vue'
-import { dataStore } from '~/store'
+import { authStore, dataStore } from '~/store'
 export default {
   components: { AppInput, AppAddButton },
+  validate() {
+    const pages = authStore.user?.role.pages
+    if (pages) {
+      const page = pages.find((p) => p.value === 'data-departments')
+      if (page) {
+        return true
+      }
+      return false
+    }
+    return false
+  },
   data() {
     return {
       dataStore,

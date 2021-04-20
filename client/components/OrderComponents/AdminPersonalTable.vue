@@ -82,8 +82,9 @@
         </template>
       </el-table-column>
       <el-table-column min-width="100" label="Изменить" align="center">
-        <template slot-scope="{ row }">
+        <template v-if="button" slot-scope="{ row }">
           <el-button
+            v-if="row.creator.id === authStore.user.id"
             type="primary"
             size="mini"
             icon="el-icon-edit"
@@ -91,13 +92,23 @@
             class="px-1.5 py-1"
             @click="$emit('updateDocument', row)"
           />
+          <el-button
+            v-if="row.creator.id === authStore.user.id"
+            :loading="documentsStore.loading"
+            icon="el-icon-delete"
+            size="mini"
+            type="danger"
+            plain
+            class="px-1.5 py-1"
+            @click="$emit('deleteDocument', row.id)"
+          />
         </template>
       </el-table-column>
     </el-table>
   </div>
 </template>
 <script>
-import { authStore } from '~/store'
+import { authStore, documentsStore } from '~/store'
 import { tableRowClassName } from '~/utils/order.util'
 
 export default {
@@ -106,10 +117,16 @@ export default {
       type: Array,
       default: () => [],
     },
+    button: {
+      type: Boolean,
+      default: true,
+    },
   },
   data() {
     return {
       tableRowClassName,
+      documentsStore,
+      authStore,
     }
   },
   computed: {

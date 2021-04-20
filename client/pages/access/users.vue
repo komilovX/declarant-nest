@@ -1,9 +1,14 @@
 <template>
   <div>
-    <app-header
-      header-text="Пользователи"
-      @on-click="$router.push(`/access/add-user`)"
-    />
+    <div class="flex items-center">
+      <h2 class="mr-2 text-lg font-medium">Пользователи</h2>
+      <app-add-button
+        v-role:create="'access-users'"
+        size="small"
+        @on-click="$router.push('/access/add-user')"
+      />
+    </div>
+    <hr class="my-2" />
     <div>
       <el-input
         v-model="search"
@@ -55,10 +60,12 @@
           <template slot-scope="{ row: { id } }">
             <div class="flex items-center">
               <i
+                v-role:update="'access-users'"
                 class="el-icon-edit text-blue-500 text-lg mr-4 cursor-pointer"
                 @click="$router.push(`/access/edit-user/${id}`)"
               />
               <i
+                v-role:delete="'access-users'"
                 class="el-icon-delete text-red-600 text-lg cursor-pointer"
                 @click="removeUser(id)"
               />
@@ -72,12 +79,21 @@
 
 <script>
 import accessForm from '@/mixins/accessForm'
-import AppHeader from '../../components/AppComponents/AppHeader.vue'
-import { userStore, rolesStore } from '~/store'
+import { userStore, rolesStore, authStore } from '~/store'
 export default {
-  components: { AppHeader },
   mixins: [accessForm],
   middleware: ['admin-auth'],
+  validate() {
+    const pages = authStore.user?.role.pages
+    if (pages) {
+      const page = pages.find((p) => p.value === 'access-users')
+      if (page) {
+        return true
+      }
+      return false
+    }
+    return false
+  },
   data: () => ({
     userStore,
     rolesStore,

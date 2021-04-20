@@ -1,14 +1,14 @@
 <template>
   <div>
-    <app-header header-text="Мои заявки" :button="false" />
+    <app-header header-text="Архивы" :button="false" />
     <data-grid :fetch-data="fetchData" :column-defs="orderTableColumn" />
   </div>
 </template>
 
 <script>
+import OrderStatus from '~/components/AgGrid/OrderStatus'
 import DataGrid from '~/components/DataGrid'
 import ActionRenderer from '~/components/AgGrid/ActionsRenderer'
-import OrderStatus from '~/components/AgGrid/OrderStatus'
 import { authStore, dataStore, userStore } from '~/store'
 import { statuses } from '~/utils/data'
 import AppHeader from '~/components/AppComponents/AppHeader.vue'
@@ -20,7 +20,7 @@ export default {
   validate() {
     const pages = authStore.user?.role.pages
     if (pages) {
-      const page = pages.find((p) => p.value === 'my-orders')
+      const page = pages.find((p) => p.value === 'archive')
       if (page) {
         return true
       }
@@ -31,7 +31,6 @@ export default {
   data: () => {
     return {
       order_id: 0,
-      newDeclarant: '',
     }
   },
   async fetch({ error }) {
@@ -69,7 +68,9 @@ export default {
           sortable: false,
           noSearch: true,
           suppressFilterButton: true,
-          cellRenderer: ({ value }) => value?.name,
+          cellRenderer: ({ value }) => {
+            return value?.name
+          },
           floatingFilterComponent: 'dropdownFilter',
           floatingFilterComponentParams: {
             suppressFilterButton: true,
@@ -78,6 +79,7 @@ export default {
               label: u.name,
               value: u.id,
             })),
+            onParentModelChanged: () => {},
           },
         },
         {
@@ -179,6 +181,7 @@ export default {
           noSearch: true,
           filter: false,
           sortable: false,
+          width: 110,
           cellRendererFramework: ActionRenderer,
           cellRendererParams: {
             showView: true,
@@ -187,7 +190,7 @@ export default {
             loading: that.chatLoading,
             userId: authStore.user.id,
             viewClicked(data) {
-              that.$router.push(`/my-orders/${data.id}`)
+              that.$router.push(`/archive/${data.id}`)
             },
           },
         },
@@ -197,26 +200,10 @@ export default {
   methods: {
     async fetchData(queryData) {
       try {
-        return await this.$axios.$post('/orders/declarant', queryData)
+        return await this.$axios.$post('/orders/grid?archived=true', queryData)
       } catch (error) {
         console.log(error)
       }
-    },
-    statusFilterParams() {
-      return {
-        suppressFilterButton: true,
-        optionsLabel: 'Select',
-        options: Object.keys(this.statuses).map((key) => ({
-          value: key,
-          key: this.statuses[key],
-        })),
-      }
-    },
-    changeOrderStatus(index) {
-      this.orders[index].archived = true
-    },
-    filterTag(value, row) {
-      return row.status === value
     },
   },
 }

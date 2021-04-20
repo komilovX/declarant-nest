@@ -2,7 +2,7 @@
   <div>
     <el-row :gutter="20" class="p1">
       <el-col :span="24" :md="16" :sm="24">
-        <div class="mb-2 flex items-center">
+        <div v-role:create="'data-shippers'" class="mb-2 flex items-center">
           <app-input
             :value="name"
             class="mr-2 w-1 md:w-1/2"
@@ -27,6 +27,7 @@
           <el-table-column label="Удалить" align="center">
             <template slot-scope="{ row: { id } }">
               <el-button
+                v-role:update="'data-shippers'"
                 type="danger"
                 plain
                 size="mini"

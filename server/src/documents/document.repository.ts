@@ -1,4 +1,11 @@
-import { EntityRepository, getRepository, In, Like, Repository } from 'typeorm'
+import {
+  EntityRepository,
+  getRepository,
+  In,
+  Like,
+  Raw,
+  Repository,
+} from 'typeorm'
 import { Document } from './document.entity'
 import {
   CreateDocumentDto,
@@ -106,25 +113,81 @@ export class DocumentRepository extends Repository<Document> {
     const { filter, sort, limit, page = 1 } = findOrderGridDto
 
     const filterColumns = {}
+    const filterArrays = []
     Object.keys(filter).forEach((key) => {
-      filterColumns[key] = Like(`%${filter[key]}%`)
+      switch (key) {
+        case 'documentType.number':
+          filterColumns['documentType'] = { id: filter[key] }
+          return
+        case 'documentType.name':
+          filterColumns['documentType'] = { id: filter[key] }
+          return
+        case 'creator':
+          filterColumns['creator'] = { id: filter[key] }
+          return
+        case 'order.client':
+          filterArrays.push(
+            `CAST(client.id AS VARCHAR(30)) LIKE '%${filter[key]}%'`,
+          )
+          return
+        case 'order.post_number':
+          filterArrays.push(`order.post_number LIKE '%${filter[key]}%'`)
+          return
+        case 'order':
+          filterArrays.push(
+            `CAST(order.id AS VARCHAR(30)) LIKE '%${filter[key]}%'`,
+          )
+          return
+        case 'order.container':
+          filterArrays.push(`order.container LIKE '%${filter[key]}%'`)
+          return
+        case 'order.shipper':
+          filterArrays.push(
+            `CAST(shipper.id AS VARCHAR(30)) LIKE '%${filter[key]}%'`,
+          )
+          return
+        case 'order.product':
+          filterArrays.push(
+            `CAST(product.id AS VARCHAR(30)) LIKE '%${filter[key]}%'`,
+          )
+          return
+        default:
+          filterColumns[key] = Raw(
+            (alias) => `CAST(${alias} AS VARCHAR(30)) LIKE '%${filter[key]}%'`,
+          )
+          break
+      }
     })
     let conditions
 
     if (status) {
       conditions = {
         status: typeof status === 'string' ? status : In(status),
-        declarant: user,
+        declarantId: user.id,
         ...filterColumns,
       }
     } else {
-      conditions = { declarant: user, ...filterColumns }
+      conditions = { declarantId: user.id, ...filterColumns }
     }
 
     return this.findAndCount({
-      where: conditions,
+      join: {
+        alias: 'document',
+        innerJoinAndSelect: {
+          order: 'document.order',
+          client: 'order.client',
+          shipper: 'order.shipper',
+          product: 'order.product',
+          documentType: 'document.documentType',
+          creator: 'document.creator',
+        },
+      },
+      where: (qb) => {
+        filterArrays.length
+          ? qb.where(conditions).andWhere(filterArrays.join(' AND '))
+          : qb.where(conditions)
+      },
       order: sort,
-      relations: ['order'],
       skip: (page - 1) * limit,
       take: limit,
     })

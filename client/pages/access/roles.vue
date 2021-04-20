@@ -1,6 +1,14 @@
 <template>
   <div>
-    <app-header header-text="Роли" @on-click="openDialog" />
+    <div class="flex items-center">
+      <h2 class="mr-2 text-lg font-medium">Роли</h2>
+      <app-add-button
+        v-role:create="'access-roles'"
+        size="small"
+        @on-click="openDialog"
+      />
+    </div>
+    <hr class="my-2" />
     <div>
       <el-table :data="rolesStore.roles" class="w-100 rounded mt-6">
         <el-table-column
@@ -32,10 +40,12 @@
           <template slot-scope="{ row: { id }, $index }">
             <div class="flex items-center">
               <i
+                v-role:update="'access-roles'"
                 class="el-icon-edit text-blue-500 text-lg mr-4 cursor-pointer"
                 @click="editRole($index)"
               />
               <i
+                v-role:delete="'access-roles'"
                 class="el-icon-delete text-red-600 text-lg cursor-pointer"
                 @click="removeRole(id)"
               />
@@ -55,13 +65,23 @@
 
 <script>
 import accessForm from '@/mixins/accessForm'
-import AppHeader from '../../components/AppComponents/AppHeader.vue'
-import { rolesStore } from '~/store'
+import { authStore, rolesStore } from '~/store'
 import RoleDialog from '~/components/DialogComponents/RoleDialog.vue'
 export default {
-  components: { AppHeader, RoleDialog },
+  components: { RoleDialog },
   mixins: [accessForm],
   middleware: ['admin-auth'],
+  validate() {
+    const pages = authStore.user?.role.pages
+    if (pages) {
+      const page = pages.find((p) => p.value === 'access-roles')
+      if (page) {
+        return true
+      }
+      return false
+    }
+    return false
+  },
   data: () => ({
     rolesStore,
     usersList: [],

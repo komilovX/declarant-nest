@@ -122,6 +122,17 @@ export default {
     UpdateDeclarantTask,
     OrderTaskStatuses,
   },
+  validate() {
+    const pages = authStore.user?.role.pages
+    if (pages) {
+      const page = pages.find((p) => p.value === 'my-orders')
+      if (page) {
+        return true
+      }
+      return false
+    }
+    return false
+  },
   async asyncData({ route, error }) {
     try {
       const {

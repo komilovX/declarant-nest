@@ -59,13 +59,13 @@ export default {
         },
         {
           headerName: 'Номер документ',
-          field: 'documentType',
+          field: 'documentType.number',
           width: 120,
           headerTooltip: 'Номер документ',
           sortable: false,
           noSearch: true,
           suppressFilterButton: true,
-          cellRenderer: ({ value }) => value?.number,
+          cellRenderer: ({ value }) => value,
           floatingFilterComponent: 'dropdownFilter',
           floatingFilterComponentParams: {
             suppressFilterButton: true,
@@ -78,12 +78,12 @@ export default {
         },
         {
           headerName: 'Наименование',
-          field: 'documentType',
+          field: 'documentType.name',
           width: 150,
           sortable: false,
           noSearch: true,
           suppressFilterButton: true,
-          cellRenderer: ({ value }) => value?.name,
+          cellRenderer: ({ value }) => value,
           floatingFilterComponent: 'dropdownFilter',
           floatingFilterComponentParams: {
             suppressFilterButton: true,
@@ -116,8 +116,7 @@ export default {
         },
         {
           headerName: 'Пост №',
-          field: 'order',
-          cellRenderer: ({ value }) => value?.post_number,
+          field: 'order.post_number',
         },
         {
           headerName: 'Декларант',
@@ -140,11 +139,11 @@ export default {
         },
         {
           headerName: 'Грузоотправитель',
-          field: 'order',
+          field: 'order.shipper',
           width: 150,
           headerTooltip: 'Грузоотправитель',
-          cellRenderer: ({ value }) => value?.shipper?.name,
-          tooltipValueGetter: ({ value }) => value?.shipper?.name,
+          cellRenderer: ({ value }) => value?.name,
+          tooltipValueGetter: ({ value }) => value?.name,
           sortable: false,
           noSearch: true,
           suppressFilterButton: true,
@@ -160,10 +159,10 @@ export default {
         },
         {
           headerName: 'Клиент фирма',
-          field: 'order',
+          field: 'order.client',
           width: 220,
-          cellRenderer: ({ value }) => value?.client?.name,
-          tooltipValueGetter: ({ value }) => value?.client?.name,
+          cellRenderer: ({ value }) => value?.name,
+          tooltipValueGetter: ({ value }) => value?.name,
           sortable: false,
           noSearch: true,
           suppressFilterButton: true,
@@ -179,12 +178,12 @@ export default {
         },
         {
           headerName: 'Товара',
-          field: 'order',
+          field: 'order.product',
           width: 200,
           sortable: false,
           noSearch: true,
           suppressFilterButton: true,
-          cellRenderer: ({ value }) => value?.product?.name,
+          cellRenderer: ({ value }) => value?.name,
           floatingFilterComponent: 'dropdownFilter',
           floatingFilterComponentParams: {
             suppressFilterButton: true,
@@ -197,9 +196,9 @@ export default {
         },
         {
           headerName: 'Контейнер №',
-          field: 'order',
+          field: 'order.container',
           width: 180,
-          cellRenderer: ({ value }) => value?.container,
+          cellRenderer: ({ value }) => value,
         },
         {
           pinned: 'right',

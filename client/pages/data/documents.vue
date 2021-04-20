@@ -1,8 +1,36 @@
 <template>
   <div>
-    <app-header header-text="Документы" @on-click="dialogVisible = true" />
+    <div class="flex justify-between items-center">
+      <div class="flex items-center">
+        <h2 class="mr-2 text-lg font-medium">Документы</h2>
+        <app-add-button
+          v-role:create="'data-documents'"
+          size="small"
+          @on-click="dialogVisible = true"
+        />
+      </div>
+      <el-input
+        v-model="search"
+        placeholder="Быстрый поиск"
+        prefix-icon="el-icon-search"
+        size="medium"
+        class="w-1/3 mb-2"
+      />
+    </div>
+    <hr class="my-2" />
     <div>
-      <el-table :data="documentTypeStore.documentTypes" size="small" border>
+      <el-table
+        :data="
+          documentTypeStore.documentTypes.filter(
+            (a) =>
+              !search ||
+              a.name.toLowerCase().includes(search.toLowerCase()) ||
+              a.number.toLowerCase().includes(search.toLowerCase())
+          )
+        "
+        size="small"
+        border
+      >
         <el-table-column width="90" label="№" prop="number" align="center" />
         <el-table-column
           width="150"
@@ -40,6 +68,7 @@
         <el-table-column label="Действия" align="center">
           <template slot-scope="{ row: { id }, $index }" class="flex">
             <el-button
+              v-role:update="'data-documents'"
               type="primary"
               plain
               size="mini"
@@ -49,6 +78,7 @@
               @click="editDocument($index)"
             />
             <el-button
+              v-role:delete="'data-documents'"
               type="danger"
               plain
               size="mini"
@@ -72,15 +102,26 @@
 </template>
 
 <script>
-import AppHeader from '../../components/AppComponents/AppHeader.vue'
 import DocumentDialog from '~/components/DialogComponents/DocumentDialog.vue'
-import { dataStore, documentTypeStore } from '~/store'
+import { authStore, dataStore, documentTypeStore } from '~/store'
 import { documentTypes } from '~/utils/data'
 
 export default {
-  components: { AppHeader, DocumentDialog },
+  components: { DocumentDialog },
   middleware: ['admin-auth'],
+  validate() {
+    const pages = authStore.user?.role.pages
+    if (pages) {
+      const page = pages.find((p) => p.value === 'data-documents')
+      if (page) {
+        return true
+      }
+      return false
+    }
+    return false
+  },
   data: () => ({
+    search: '',
     dataStore,
     documentTypeStore,
     documentTypes,
