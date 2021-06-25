@@ -213,8 +213,8 @@ export default {
               that.order_id = order.id
               that.fetchMessages(order.id)
             },
-            deleteClicked(_id) {
-              that.deleteOrder(_id)
+            deleteClicked(data) {
+              that.deleteOrder(data.id)
             },
           },
         },
