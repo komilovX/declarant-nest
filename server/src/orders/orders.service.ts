@@ -120,11 +120,13 @@ export class OrdersService {
     })
     order.documents = preloadedDocuments
 
+    const newOrder = await this.orderRepository.save(order)
+
     this.notificationService.createNotification(
-      orderGivenToYou(user.name, order.id),
+      orderGivenToYou(user.name, newOrder.id),
       [user.id, +declarantId],
     )
-    return this.orderRepository.save(order)
+    return newOrder
   }
 
   async updateOrder(id: number, updateOrderDto: UpdateOrderDto) {

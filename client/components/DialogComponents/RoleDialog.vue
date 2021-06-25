@@ -5,7 +5,7 @@
     @close="$emit('closeDialog')"
   >
     <el-form
-      ref="rolesForm"
+      ref="roleForm"
       :model="roleForm"
       :rules="rules"
       label-width="90px"
@@ -65,14 +65,14 @@
     </el-form>
 
     <div style="text-align: right">
-      <el-button type="danger" plain size="small" @click="$emit('closeDialog')">
+      <el-button type="danger" plain size="mini" @click="$emit('closeDialog')">
         отменить
       </el-button>
       <el-button
         type="primary"
-        size="small"
+        size="mini"
         :loading="rolesStore.loading"
-        @click="submitForm('rolesForm')"
+        @click="submitForm('roleForm')"
       >
         подтвердить
       </el-button>
@@ -80,7 +80,7 @@
   </el-dialog>
 </template>
 <script lang="ts">
-import { Tree } from 'element-ui'
+import { Form, Tree } from 'element-ui'
 import Vue from 'vue'
 import { sidebarRoles } from '@/assets/config/sidebar'
 import { rolesStore } from '~/store'
@@ -124,6 +124,7 @@ export default Vue.extend({
       if (value === 'edit') {
         this.setRole()
       } else {
+        this.clearFormInput()
         this.clearForms()
       }
     },
@@ -132,13 +133,6 @@ export default Vue.extend({
         this.setRole()
       }
     },
-  },
-  mounted() {
-    if (this.type === 'edit') {
-      this.setRole()
-    } else {
-      this.clearForms()
-    }
   },
   methods: {
     setRole() {
@@ -180,6 +174,9 @@ export default Vue.extend({
       this.checkedKeys = sidebarRoles()
         .filter((d) => d.disabled)
         .map((d) => d.value) as any
+    },
+    clearFormInput() {
+      ;(this.$refs.roleForm as Form).resetFields()
     },
     submitForm(form: any) {
       ;(this.$refs[form] as any).validate(

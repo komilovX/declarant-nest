@@ -98,7 +98,7 @@ export default {
           try {
             await this.userStore.addUser(formData)
             this.$message.success('Сотрудник успешно обновлен')
-            this.$router.push('/access')
+            this.$router.push('/access/users')
           } catch (e) {
             console.log(e)
           }

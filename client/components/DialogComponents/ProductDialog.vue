@@ -14,7 +14,7 @@
       />
       <app-add-button @on-click="addProduct" />
     </div>
-    <el-table :data="products" size="small" border>
+    <el-table v-loading="loading" :data="products" size="small" border>
       <el-table-column min-width="70" label="#" type="index" align="center" />
       <el-table-column
         min-width="110"
@@ -29,6 +29,7 @@
             plain
             size="mini"
             icon="el-icon-delete"
+            class="px-1.5 py-1"
             @click="deleteProduct(id)"
           />
         </template>
@@ -38,6 +39,7 @@
 </template>
 
 <script>
+import { dataStore } from '~/store'
 export default {
   props: {
     visible: {
@@ -47,10 +49,6 @@ export default {
     products: {
       type: Array,
       default: () => [],
-    },
-    loading: {
-      type: Boolean,
-      default: false,
     },
     onClose: {
       type: Function,
@@ -62,13 +60,18 @@ export default {
       name: '',
     }
   },
+  computed: {
+    loading() {
+      return dataStore.loading
+    },
+  },
   methods: {
     async addProduct() {
       if (this.name) {
         try {
-          await this.$store.dispatch('data/addProduct', { name: this.name })
+          await dataStore.addProduct({ name: this.name })
           this.name = ''
-          this.$message.success('товар успешно добавлен')
+          this.$message.success('Товар успешно добавлен')
         } catch (e) {
           console.log(e)
         }
@@ -76,7 +79,8 @@ export default {
     },
     async deleteProduct(id) {
       try {
-        await this.$store.dispatch('data/removeProduct', id)
+        await dataStore.removeProduct(id)
+        this.$message.success('Товар успешно удален')
       } catch (e) {
         console.error(e)
       }

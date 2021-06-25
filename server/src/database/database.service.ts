@@ -108,12 +108,11 @@ export class DatabaseService {
 
   async deleteShipper(id: number) {
     const shipper = await this.shipperRepository.findOne(id)
-
     if (!shipper) {
       throw new NotFoundException(`shipper with #${id} not found`)
     }
 
-    this.shipperRepository.remove(shipper)
+    return this.shipperRepository.remove(shipper)
   }
   // Products
   getAllProducts() {
@@ -178,7 +177,6 @@ export class DatabaseService {
 
   async deleteDepartment(id: number) {
     const department = await this.departmentRepository.findOne(id)
-    console.log('department', department)
     if (!department) {
       throw new NotFoundException(`department with #${id} not found`)
     }

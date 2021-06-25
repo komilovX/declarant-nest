@@ -129,7 +129,7 @@ class Data extends VuexModule {
 
   @Mutation
   setProduct(product: ProductI) {
-    this.departments = [...this.products, product]
+    this.products = [...this.products, product]
   }
 
   @Mutation
@@ -210,7 +210,7 @@ class Data extends VuexModule {
   }
 
   @Action({ rawError: true })
-  async addShipper(data: Clients) {
+  async addShipper(data: Shippers) {
     try {
       this.setLoading(true)
       const shipper = await $axios.$post('/database/shipper', data)
@@ -230,7 +230,7 @@ class Data extends VuexModule {
       this.setLoading(true)
       await $axios.$delete(`/database/shipper/${id}`)
 
-      this.deleteClient(id)
+      this.deleteShipper(id)
       this.setLoading(false)
     } catch (error) {
       this.setLoading(false)

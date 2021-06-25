@@ -3,7 +3,7 @@
     title="Грузоотправитель"
     :visible.sync="visible"
     :before-close="onClose"
-    custom-class="w-11/12 md:w-1/2"
+    custom-class="w-11/12 md:w-7/12"
   >
     <div class="mb-1 df">
       <app-input
@@ -14,7 +14,7 @@
       />
       <app-add-button @on-click="addShipper" />
     </div>
-    <el-table :data="shippers" size="small" border>
+    <el-table v-loading="loading" :data="shippers" size="mini" border>
       <el-table-column min-width="70" label="#" type="index" align="center" />
       <el-table-column
         min-width="110"
@@ -22,13 +22,14 @@
         align="center"
         prop="name"
       />
-      <el-table-column label="Удалить" align="center">
+      <el-table-column width="150" label="Удалить" align="center">
         <template slot-scope="{ row: { id } }">
           <el-button
             type="danger"
             plain
             size="mini"
             icon="el-icon-delete"
+            class="px-1.5 py-1"
             @click="deleteShipper(id)"
           />
         </template>
@@ -38,6 +39,7 @@
 </template>
 
 <script>
+import { dataStore } from '~/store'
 export default {
   props: {
     visible: {
@@ -55,32 +57,30 @@ export default {
   },
   data() {
     return {
-      loading: false,
       name: '',
     }
+  },
+  computed: {
+    loading() {
+      return dataStore.loading
+    },
   },
   methods: {
     async addShipper() {
       if (this.name) {
-        this.loading = true
         try {
-          const shipper = await this.$axios.$post('api/shippers', {
-            name: this.name,
-          })
-          this.loading = false
+          await dataStore.addShipper({ name: this.name })
           this.name = ''
           this.$message.success('Грузоотправитель успешно добавлен')
-          this.$emit('shipperAdded', shipper)
         } catch (e) {
-          this.loading = false
           console.log(e)
         }
       }
     },
     async deleteShipper(id) {
       try {
-        await this.$axios.$delete(`api/shippers/${id}`)
-        this.$emit('shipper-deleted', id)
+        await dataStore.removeShipper(id)
+        this.$message.success('Грузоотправитель успешно удален')
       } catch (e) {
         console.error(e)
       }

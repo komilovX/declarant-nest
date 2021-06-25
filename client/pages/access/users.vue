@@ -4,7 +4,6 @@
       <h2 class="mr-2 text-lg font-medium">Пользователи</h2>
       <app-add-button
         v-role:create="'access-users'"
-        size="small"
         @on-click="$router.push('/access/add-user')"
       />
     </div>
@@ -14,7 +13,7 @@
         v-model="search"
         placeholder="Быстрый поиск"
         prefix-icon="el-icon-search"
-        size="medium"
+        size="small"
         class="w-1/3 mb-2"
       />
       <el-table

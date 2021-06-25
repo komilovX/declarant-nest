@@ -2,11 +2,7 @@
   <div>
     <div class="flex items-center">
       <h2 class="mr-2 text-lg font-medium">Роли</h2>
-      <app-add-button
-        v-role:create="'access-roles'"
-        size="small"
-        @on-click="openDialog"
-      />
+      <app-add-button v-role:create="'access-roles'" @on-click="openDialog" />
     </div>
     <hr class="my-2" />
     <div>
@@ -22,16 +18,23 @@
           </template>
         </el-table-column>
         <el-table-column
-          min-width="200"
+          min-width="250"
           align="center"
           label="Название"
-          width="220"
+          width="350"
+          show-overflow-tooltip
         >
           <template slot-scope="{ row }">
             {{ row.name }}
           </template>
         </el-table-column>
-        <el-table-column min-width="160" align="header-center" label="Описание">
+        <el-table-column
+          min-width="160"
+          width="400"
+          show-overflow-tooltip
+          align="header-center"
+          label="Описание"
+        >
           <template slot-scope="{ row }">
             {{ row.description }}
           </template>

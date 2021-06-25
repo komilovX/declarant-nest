@@ -21,7 +21,7 @@
             align="center"
             prop="name"
           />
-          <el-table-column width="150" label="Удалить" align="center">
+          <el-table-column width="145" label="Удалить" align="center">
             <template slot-scope="{ row: { id } }">
               <el-button
                 v-role:update="'data-departments'"

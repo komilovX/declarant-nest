@@ -308,7 +308,6 @@
       <product-dialog
         :visible="productDialogVisible"
         :products="dataStore.products"
-        :loading="dataStore.loading"
         :on-close="() => (productDialogVisible = false)"
       />
       <!-- Dialog -->

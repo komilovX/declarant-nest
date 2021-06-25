@@ -50,6 +50,7 @@ export default {
     try {
       const notifications = await notificationStore.findAllNotifications()
       const statistics = await statisticsStore.findTasksAndOrdersCount()
+      console.log(`notifications`, notifications)
       return { notifications, statistics }
     } catch (err) {
       console.warn(`err.code`, err.statusCode)
