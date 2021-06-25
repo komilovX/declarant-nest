@@ -62,7 +62,7 @@ export default Vue.extend({
       this.params.messageClicked(this.params.data)
     },
     deleteClicked() {
-      this.params.deleteClicked()
+      this.params.deleteClicked(this.params.data)
     },
   },
 })
