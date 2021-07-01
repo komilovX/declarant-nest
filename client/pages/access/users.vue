@@ -46,7 +46,7 @@
           "
           :filter-method="filterRole"
           filter-placement="bottom-end"
-          width="250"
+          width="400"
           label="Должность"
         >
           <template slot-scope="{ row: { role } }">

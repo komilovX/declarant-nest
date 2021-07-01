@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="flex items-center">
-      <h2 class="mr-2 text-lg font-medium">Контракты</h2>
+      <h2 class="mr-2 text-lg font-medium">Документы</h2>
       <app-add-button
         v-role:create="'contracts'"
         size="small"
