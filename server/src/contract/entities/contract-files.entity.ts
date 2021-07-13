@@ -15,8 +15,13 @@ export class ContractFiles extends BaseEntity {
   @Column()
   date: Date
 
-  @ManyToOne(() => ContractNumbers, (contractNumber) => contractNumber.files)
+  @ManyToOne(() => ContractNumbers, (contractNumber) => contractNumber.files, {
+    onDelete: 'CASCADE',
+  })
   contractNumber: ContractNumbers
+
+  @Column({ default: null })
+  name: string
 
   @Column()
   file: string

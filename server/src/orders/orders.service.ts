@@ -124,7 +124,7 @@ export class OrdersService {
 
     this.notificationService.createNotification(
       orderGivenToYou(user.name, newOrder.id),
-      [user.id, +declarantId],
+      [+declarantId],
     )
     return newOrder
   }

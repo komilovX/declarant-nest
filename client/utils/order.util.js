@@ -55,3 +55,13 @@ export function gridCellStyle(params) {
   }
   return { textAlign: 'center' }
 }
+
+export function archiveCellStyle(params) {
+  if (params.data && params.data.deleted === true) {
+    return { backgroundColor: '#fef0f0', textAlign: 'center' }
+  }
+  if (params.data && params.data.archived === DocumentStatus.RETURNED) {
+    return { backgroundColor: '#ecf5ff', textAlign: 'center' }
+  }
+  return { textAlign: 'center' }
+}

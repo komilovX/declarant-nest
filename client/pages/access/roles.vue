@@ -121,8 +121,8 @@ export default {
       this.dialogVisible = true
     },
     openDialog() {
-      this.dialogVisible = true
       this.dialogType = 'create'
+      this.dialogVisible = true
     },
   },
 }

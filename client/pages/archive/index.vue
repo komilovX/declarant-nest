@@ -1,7 +1,19 @@
 <template>
   <div>
-    <app-header header-text="Архивы" :button="false" />
-    <data-grid :fetch-data="fetchData" :column-defs="orderTableColumn" />
+    <div class="flex justify-between items-center">
+      <h2 class="mr-2 text-lg font-medium">Архивы</h2>
+      <div>
+        <el-tag type="success" size="small" class="mr-2"> Завершен </el-tag>
+        <el-tag type="danger" size="small"> Отменен </el-tag>
+      </div>
+    </div>
+    <data-grid
+      ref="dataGrid"
+      :fetch-data="fetchData"
+      :column-defs="orderTableColumn"
+      :cellStyle="archiveCellStyle"
+      :height="76"
+    />
   </div>
 </template>
 
@@ -11,11 +23,10 @@ import DataGrid from '~/components/DataGrid'
 import ActionRenderer from '~/components/AgGrid/ActionsRenderer'
 import { authStore, dataStore, userStore } from '~/store'
 import { statuses } from '~/utils/data'
-import AppHeader from '~/components/AppComponents/AppHeader.vue'
 import { fetchOrderFilters } from '~/utils/fetch-service'
-
+import { archiveCellStyle } from '~/utils/order.util.js'
 export default {
-  components: { DataGrid, AppHeader },
+  components: { DataGrid },
   middleware: ['admin-auth'],
   validate() {
     const pages = authStore.user?.role.pages
@@ -30,6 +41,7 @@ export default {
   },
   data: () => {
     return {
+      archiveCellStyle,
       order_id: 0,
     }
   },

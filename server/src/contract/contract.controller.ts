@@ -13,7 +13,12 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express'
 import { diskStorage } from 'multer'
 import { editFileName } from 'src/utils/file-uploading.utils'
-import { CreateContractDto } from './contract.dto'
+import {
+  ContractNumberDto,
+  CreateContractClientDto,
+  CreateContractDto,
+  CreateContractShipperDto,
+} from './contract.dto'
 import { ContractService } from './contract.service'
 
 @Controller('contract')
@@ -25,20 +30,30 @@ export class ContractController {
     return this.contractService.createContract(createContractDto)
   }
 
+  @Post('/client')
+  createContractClient(
+    @Body() createContractClientDto: CreateContractClientDto,
+  ) {
+    return this.contractService.createContractClient(createContractClientDto)
+  }
+
+  @Post('/shipper')
+  createContractShipper(
+    @Body() createContractShipperDto: CreateContractShipperDto,
+  ) {
+    return this.contractService.createContractShipper(createContractShipperDto)
+  }
+
   @Get('/')
   findAllContracts(
     @Query('documentTypeId') docuemntTypeId: number,
     @Query('clientId') clientId: number,
-    @Query('contractId') contractId: number,
   ) {
-    if (docuemntTypeId && clientId) {
-      return this.contractService.findAllShippersById(docuemntTypeId, clientId)
+    if (clientId) {
+      return this.contractService.findContractShippers(clientId)
     }
     if (docuemntTypeId) {
-      return this.contractService.findAllClientsById(docuemntTypeId)
-    }
-    if (contractId) {
-      return this.contractService.findAllNumbersByContractId(contractId)
+      return this.contractService.findContractClients(docuemntTypeId)
     }
     return this.contractService.findAllContracts()
   }
@@ -51,14 +66,29 @@ export class ContractController {
     return this.contractService.findAllContractsForOrder(clientId, shipperId)
   }
 
-  @Put('/number/:id')
-  addNumberContract(@Body('number') number: string, @Param('id') id: number) {
-    return this.contractService.addNumberContract(id, number)
+  @Post('/number')
+  addContractNumber(@Body() contractNumberDto: ContractNumberDto) {
+    return this.contractService.addContractNumber(contractNumberDto)
   }
 
   @Delete('/number/:id')
   deleteContractNumber(@Param('id') id: number) {
     return this.contractService.deleteContractNumber(id)
+  }
+
+  @Delete('/client/:id')
+  deleteContractClient(@Param('id') id: number) {
+    return this.contractService.deleteContractClient(id)
+  }
+
+  @Delete('/document/:id')
+  deleteContractDocument(@Param('id') id: number) {
+    return this.contractService.deleteContractDocument(id)
+  }
+
+  @Delete('/shipper/:id')
+  deleteContractShipper(@Param('id') id: number) {
+    return this.contractService.deleteContractShipper(id)
   }
 
   @Put('/file/:id')
@@ -74,8 +104,7 @@ export class ContractController {
     @UploadedFile() file: Express.Multer.File,
     @Param('id') id: number,
   ) {
-    console.log('file', file)
-    return this.contractService.addContractFile(file.filename, id)
+    return this.contractService.addContractFile(file, id)
   }
 
   @Delete('/file/:id')

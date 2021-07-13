@@ -172,6 +172,7 @@ export default {
               fd.append('files', file.raw, file.name)
             )
             const document = await documentsStore.createDocument(fd)
+            if (!document.price) document.price = []
             this.$emit('documentAdded', document)
             this.$message.success('Документ успешно добовлен')
             this.$refs.documentForm.resetFields()

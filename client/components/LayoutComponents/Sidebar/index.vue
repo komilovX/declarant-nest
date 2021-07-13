@@ -60,7 +60,7 @@
               </button>
             </div>
             <div class="flex items-center jestify-center px-4">
-              <p class="text-2xl font-medium text-white">Declarant</p>
+              <p class="text-2xl font-medium text-white">AHEAD GROUP</p>
               <!-- <img class="h-8 w-48" src="apex_logo.svg" alt="Workflow" /> -->
             </div>
             <div class="mt-5 flex-1 h-0 overflow-y-auto">
@@ -75,11 +75,10 @@
     <div class="hidden md:flex md:flex-shrink-0">
       <div class="flex flex-col w-64">
         <div class="flex flex-col h-0 flex-1">
-          <div class="flex items-center jestify-center h-14 px-4 bg-gray-900">
-            <h1 class="text-2xl font-medium text-white text-center">
-              DECLARANT
-            </h1>
-            <!-- <img class="h-12 w-48" src="apex_logo.svg" alt="Workflow" /> -->
+          <div class="flex items-center jestify-center h-12 px-4 bg-gray-900">
+            <nuxt-link to="/">
+              <logo />
+            </nuxt-link>
           </div>
           <div class="flex-1 flex flex-col overflow-y-auto">
             <nav class="flex-1 px-2 py-4 bg-gray-800 space-y-1">
@@ -95,9 +94,10 @@
 <script>
 import Vue from 'vue'
 import { Fragment } from 'vue-fragment'
+import Logo from './Logo.vue'
 import SidebarItems from './SidebarItems.vue'
 export default Vue.extend({
-  components: { SidebarItems, Fragment },
+  components: { SidebarItems, Fragment, Logo },
   props: {
     sidebarOpen: {
       type: Boolean,

@@ -1,16 +1,17 @@
 <template>
   <div>
     <div class="flex items-center">
-      <h2 class="mr-2 text-lg font-medium">Контракты</h2>
+      <h2 class="mr-2 text-lg font-medium">Документы</h2>
       <app-add-button
         v-role:create="'contracts'"
-        size="small"
+        size="mini"
         @on-click="openContractDialog"
       />
     </div>
     <hr class="my-2" />
     <el-card class="w-full">
       <el-tree
+        v-if="show"
         ref="tree"
         class="mt-4"
         :load="loadNode"
@@ -20,7 +21,49 @@
         :filter-node-method="filterNode"
       >
         <div slot-scope="{ node, data, node: { label } }">
-          <div v-if="node.level === 3">
+          <div v-if="node.level === 1">
+            <span class="mr-4">{{ node.label }}</span>
+            <span>
+              <el-button
+                type="text"
+                size="mini"
+                @click="addContractClient(data, node)"
+              >
+                Добавить
+              </el-button>
+            </span>
+            <el-button
+              v-role:delete="'contracts'"
+              class="ml-3"
+              type="text"
+              size="mini"
+              @click="() => deleteContractDocument(node, data)"
+            >
+              Удалить
+            </el-button>
+          </div>
+          <div v-else-if="node.level === 2">
+            <span class="mr-4">{{ node.label }}</span>
+            <span>
+              <el-button
+                type="text"
+                size="mini"
+                @click="addContractShipper(data, node)"
+              >
+                Добавить
+              </el-button>
+            </span>
+            <el-button
+              v-role:delete="'contracts'"
+              class="ml-3"
+              type="text"
+              size="mini"
+              @click="() => deleteContractClient(node, data)"
+            >
+              Удалить
+            </el-button>
+          </div>
+          <div v-else-if="node.level === 3">
             <span class="mr-4">{{ node.label }}</span>
             <span>
               <el-popover placement="right" width="300" trigger="click">
@@ -40,6 +83,15 @@
                   Добавить
                 </el-button>
               </el-popover>
+              <el-button
+                v-role:delete="'contracts'"
+                class="ml-3"
+                type="text"
+                size="mini"
+                @click="() => deleteContractShipper(node, data)"
+              >
+                Удалить
+              </el-button>
             </span>
           </div>
           <div v-else-if="node.level === 4" class="flex items-center">
@@ -70,6 +122,7 @@
               </el-popover>
               <el-button
                 v-role:delete="'contracts'"
+                class="ml-3"
                 type="text"
                 size="mini"
                 @click="() => deleteContractNumber(node, data)"
@@ -82,12 +135,16 @@
             <div class="flex items-center">
               <span class="flex items-center mr-6">
                 <span class="mr-2">{{ data.date | dateFormatter }}</span>
+                <span class="mr-2 overflow-text" :title="data.fileName">{{
+                  data.fileName
+                }}</span>
                 <a v-href="label" target="_blank" class="mr-2">
                   <img v-image="label" />
                 </a>
               </span>
               <el-button
                 v-role:delete="'contracts'"
+                class="ml-2"
                 type="text"
                 size="mini"
                 @click="() => deleteContractFile(node, data)"
@@ -101,12 +158,24 @@
       </el-tree>
     </el-card>
     <create-contract-dialog
-      :visible="dialogVisible"
-      :title="dialogTitle"
-      :clients="dataStore.clients"
-      :shippers="dataStore.shippers"
+      :visible="contractDialogVisible"
+      :on-close="() => (contractDialogVisible = false)"
       :documents="documentTypeStore.documentTypes"
-      :on-close="closeDialog"
+      @contractDocumentAdded="reload"
+    />
+    <create-contract-client
+      :visible="contractClientVisible"
+      :on-close="() => (contractClientVisible = false)"
+      :clients="dataStore.clients"
+      :documentTypeId="documentTypeId"
+      @contractClientAdded="reload"
+    />
+    <create-contract-shipper
+      :visible="contractShipperVisible"
+      :on-close="() => (contractShipperVisible = false)"
+      :shippers="dataStore.shippers"
+      :clientId="clientId"
+      @contractShipperForm="reload"
     />
   </div>
 </template>
@@ -114,10 +183,17 @@
 <script>
 import AppAddButton from '~/components/AppComponents/AppAddButton.vue'
 import CreateContractDialog from '~/components/DialogComponents/CreateContractDialog.vue'
+import CreateContractClient from '~/components/DialogComponents/CreateContractClient.vue'
+import CreateContractShipper from '~/components/DialogComponents/CreateContractShipper.vue'
 import { dataStore, documentTypeStore, contractStore, authStore } from '~/store'
 
 export default {
-  components: { CreateContractDialog, AppAddButton },
+  components: {
+    CreateContractDialog,
+    AppAddButton,
+    CreateContractClient,
+    CreateContractShipper,
+  },
   validate() {
     const pages = authStore.user?.role.pages
     if (pages) {
@@ -134,11 +210,16 @@ export default {
       dataStore,
       documentTypeStore,
       contractStore,
-      dialogVisible: false,
-      dialogTitle: 'Добавление контрактов',
+      contractDialogVisible: false,
+      contractClientVisible: false,
+      contractShipperVisible: false,
+      documentTypeId: -1,
+      clientId: -1,
       filterText: '',
       file: '',
+      show: true,
       fileList: [],
+      currentNode: {},
       contractNumber: '',
       contractData: [],
       defaultProps: {
@@ -157,16 +238,17 @@ export default {
       if (!value) return true
       return data.name.includes(value)
     },
+    reload() {
+      this.show = false
+      this.$nextTick(() => {
+        this.show = true
+      })
+    },
     async openContractDialog() {
       try {
-        await this.dataStore.fetchClients()
-        await this.dataStore.fetchShippers()
         await this.documentTypeStore.fetchDocumentTypes()
-        this.dialogVisible = true
+        this.contractDialogVisible = true
       } catch (error) {}
-    },
-    closeDialog() {
-      this.dialogVisible = false
     },
     onFileChange(file) {
       if (!file.name.match(/\.(jpg|jpeg|png|pdf|doc|docx|ppt|pptx)$/)) {
@@ -182,14 +264,32 @@ export default {
       }
       this.file = file.raw
     },
-    async addContractNumber(data, node) {
+    async addContractNumber(data) {
       try {
-        const res = await this.contractStore.addContractNumber({
-          id: data.contractId,
+        await this.contractStore.addContractNumber({
+          shipperId: data.shipperId,
           number: this.contractNumber,
         })
-        this.$refs.tree.append({ id: res.id, name: res.number }, node)
-        this.contractNumber = ''
+        this.$message.success('Добавлен')
+        this.reload()
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    async addContractClient(data) {
+      try {
+        await this.dataStore.fetchClients()
+        this.documentTypeId = data.id
+        this.contractClientVisible = true
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    async addContractShipper(data) {
+      try {
+        await this.dataStore.fetchShippers()
+        this.clientId = data.clientId
+        this.contractShipperVisible = true
       } catch (error) {
         console.log(error)
       }
@@ -203,6 +303,66 @@ export default {
         .then(async () => {
           try {
             await this.contractStore.deleteContractNumber(data.id)
+            this.$refs.tree.remove(node)
+          } catch (error) {
+            console.log(error)
+          }
+        })
+        .catch(() => {})
+    },
+    deleteContractDocument(node, data) {
+      this.$confirm(
+        'Уверены, что хотите удалить этот документ?',
+        'Подтверждение',
+        {
+          confirmButtonText: 'Да',
+          cancelButtonText: 'Отменить',
+          type: 'warning',
+        }
+      )
+        .then(async () => {
+          try {
+            await this.contractStore.deleteContractDocument(data.id)
+            this.$refs.tree.remove(node)
+          } catch (error) {
+            console.log(error)
+          }
+        })
+        .catch(() => {})
+    },
+    deleteContractClient(node, data) {
+      this.$confirm(
+        'Уверены, что хотите удалить этот клиент?',
+        'Подтверждение',
+        {
+          confirmButtonText: 'Да',
+          cancelButtonText: 'Отменить',
+          type: 'warning',
+        }
+      )
+        .then(async () => {
+          try {
+            await this.contractStore.deleteContractClient(data.clientId)
+            this.$refs.tree.remove(node)
+          } catch (error) {
+            console.log(error)
+          }
+        })
+        .catch(() => {})
+    },
+    deleteContractShipper(node, data) {
+      this.$confirm(
+        'Уверены, что хотите удалить этот грузоотправител?',
+        'Подтверждение',
+        {
+          confirmButtonText: 'Да',
+          cancelButtonText: 'Отменить',
+          type: 'warning',
+        }
+      )
+        .then(async () => {
+          try {
+            await this.contractStore.deleteContractShipper(data.shipperId)
             this.$refs.tree.remove(node)
           } catch (error) {
             console.log(error)
@@ -240,7 +400,13 @@ export default {
           this.file = null
           this.fileList = []
           this.$refs.tree.append(
-            { id: res.id, name: res.file, date: res.date, leaf: true },
+            {
+              id: res.id,
+              name: res.file,
+              fileName: res.name,
+              date: res.date,
+              leaf: true,
+            },
             node
           )
         } catch (error) {
@@ -258,7 +424,7 @@ export default {
         const documents = this.contractStore.contracts.map((contract) => {
           return {
             name: `${contract.documentType.number} - ${contract.documentType.name}`,
-            id: contract.documentTypeId,
+            id: contract.id,
           }
         })
         return resolve(documents)
@@ -271,37 +437,33 @@ export default {
           return {
             name: client.client.name,
             documentTypeId: client.documentTypeId,
-            clientId: client.client.id,
+            clientId: client.id,
           }
         })
         resolve(clients)
       }
       if (node.level === 2) {
-        const { documentTypeId, clientId } = node.data
-        let shippers = await this.$axios.$get(
-          `/contract?documentTypeId=${documentTypeId}&clientId=${clientId}`
-        )
+        const { clientId } = node.data
+        let shippers = await this.$axios.$get(`/contract?clientId=${clientId}`)
         shippers = shippers.map((data) => {
           return {
-            contractId: data.id,
+            shipperId: data.id,
             name: data.shipper.name,
+            numbers: data.numbers,
           }
         })
         resolve(shippers)
       }
       if (node.level === 3) {
-        const { contractId } = node.data
-        const contract = await this.$axios.$get(
-          `/contract?contractId=${contractId}`
-        )
-        const numbers = contract.map((data) => {
+        const { numbers } = node.data
+        const contractNumbers = numbers.map((data) => {
           return {
             name: data.number,
             id: data.id,
             files: data.files,
           }
         })
-        resolve(numbers)
+        resolve(contractNumbers)
       }
       if (node.level === 4) {
         const files = node.data.files.map((data) => {
@@ -309,6 +471,7 @@ export default {
             name: data.file,
             id: data.id,
             date: data.date,
+            fileName: data.name,
             leaf: true,
           }
         })

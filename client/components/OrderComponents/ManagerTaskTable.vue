@@ -90,6 +90,21 @@
           class="px-1.5 py-1"
           @click="$emit('updateDocument', row)"
         />
+        <el-popover
+          v-if="row.returnText && status === DocumentStatus.RETURNED"
+          placement="top-start"
+          class="ml-1"
+          width="200"
+          trigger="hover"
+          :content="row.returnText"
+        >
+          <el-button
+            slot="reference"
+            size="mini"
+            type="text"
+            icon="el-icon-info"
+          />
+        </el-popover>
       </template>
     </el-table-column>
   </el-table>

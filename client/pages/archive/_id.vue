@@ -88,7 +88,6 @@
             Печатать
           </el-button>
           <el-button
-            v-if="serviceList.length > 0"
             size="small"
             type="success"
             :loading="finishLoading"
@@ -215,12 +214,15 @@ export default {
       try {
         await ordersStore.updateOrderItems({
           id: this.order.id,
-          data: { archived: false },
+          data: { archived: false, deleted: false },
         })
         this.$router.push('/archive')
       } catch (e) {
         console.log(e)
       }
+    },
+    printDocument() {
+      this.$refs.converter.print()
     },
   },
 }

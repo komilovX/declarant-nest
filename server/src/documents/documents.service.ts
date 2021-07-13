@@ -3,7 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { User } from 'src/auth/user.entity'
 import { NotificationsService } from 'src/notifications/notifications.service'
 import { FindOrderGridDto } from 'src/orders/order.dto'
+import { DocumentStatus } from 'src/utils/lib/types'
 import { notificationUtils } from 'src/utils/notification.util'
+import { Document } from './document.entity'
 import { DocumentRepository } from './document.repository'
 import {
   CreateDocumentDto,
@@ -47,8 +49,21 @@ export class DocumentsService {
     )
   }
 
-  updateDocument(id: number, updateDocumentDto: UpdateDocumentDto) {
-    return this.documentRepository.updateDocument(id, updateDocumentDto)
+  async updateDocument(id: number, updateDocumentDto: UpdateDocumentDto) {
+    const doc = await this.documentRepository.findOne({
+      relations: ['order'],
+      where: { id },
+    })
+    console.log(`updateDocumentDto`, updateDocumentDto)
+    const document = this.documentRepository.updateDocument(
+      id,
+      updateDocumentDto,
+    )
+
+    if (updateDocumentDto.status) {
+      this.createNotification(doc, updateDocumentDto.status)
+    }
+    return document
   }
 
   async giveTask(user: User, giveTaskDocumentDto: GiveTaskDocumentDto) {
@@ -59,7 +74,7 @@ export class DocumentsService {
 
     this.notificationService.createNotification(
       notificationUtils.documentGivenToYou(
-        document.documentType.number,
+        document.documentType,
         document.order.id,
       ),
       [document.declarant.id],
@@ -81,5 +96,25 @@ export class DocumentsService {
 
   deleteDocument(id: number) {
     return this.documentRepository.deleteDocument(id)
+  }
+
+  private createNotification(document: Document, status: DocumentStatus) {
+    if (status === 'DONE') {
+      this.notificationService.createNotification(
+        notificationUtils.documentDone(
+          document.documentType,
+          document.order.id,
+        ),
+        [document.creator.id],
+      )
+    } else if (status === 'RETURNED') {
+      this.notificationService.createNotification(
+        notificationUtils.documentReturned(
+          document.documentType,
+          document.order.id,
+        ),
+        [document.declarant.id],
+      )
+    }
   }
 }

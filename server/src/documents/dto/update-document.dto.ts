@@ -14,4 +14,7 @@ export class UpdateDocumentDto {
 
   @IsOptional()
   status?: DocumentStatus
+
+  @IsOptional()
+  returnText?: string
 }

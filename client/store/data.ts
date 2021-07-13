@@ -10,6 +10,7 @@ import { Clients, Departments, ProductI, Shippers } from '~/utils/types'
 })
 class Data extends VuexModule {
   loading: boolean = false
+  isRequested: boolean = false
   clients: Clients[] = []
   shippers: Shippers[] = []
   products: ProductI[] = []
@@ -18,6 +19,11 @@ class Data extends VuexModule {
   @Mutation
   setLoading(loading: boolean) {
     this.loading = loading
+  }
+
+  @Mutation
+  setRequested(requested: boolean) {
+    this.isRequested = requested
   }
 
   @Mutation

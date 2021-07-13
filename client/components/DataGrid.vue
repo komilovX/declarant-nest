@@ -1,7 +1,7 @@
 <template>
   <div style="padding: 0">
     <ag-grid-vue
-      style="width: 100%; height: 72vh"
+      :style="{ width: '100%', height: height + 'vh' }"
       class="ag-theme-material w-100 my-4 ag-grid-table vs-con-loading__container"
       :grid-options="gridOptions"
       :default-col-def="defaultColDef"
@@ -37,8 +37,6 @@ import { AgGridVue } from 'ag-grid-vue'
 import { AllCommunityModules } from '@ag-grid-community/all-modules'
 import DropdownFilter from './AgGrid/DropdownFilter.js'
 import { localeText } from '~/utils/data'
-import { gridCellStyle } from '~/utils/order.util.js'
-
 export default {
   components: { AgGridVue },
   props: {
@@ -49,6 +47,16 @@ export default {
     fetchData: {
       type: Function,
       required: true,
+    },
+    height: {
+      type: Number,
+      default: 72,
+    },
+    cellStyle: {
+      type: Function,
+      default: () => {
+        return { textAlign: 'center' }
+      },
     },
   },
   data: () => {
@@ -71,7 +79,7 @@ export default {
           filterOptions: ['contains'],
           suppressAndOrCondition: true,
         },
-        cellStyle: gridCellStyle,
+        // cellStyle: gridCellStyle,
       },
       gridOptions: {
         rowModelType: 'infinite',
@@ -96,6 +104,7 @@ export default {
     this.frameworkComponents = {
       dropdownFilter: DropdownFilter,
     }
+    this.defaultColDef.cellStyle = this.cellStyle
   },
   mounted() {
     const that = this
@@ -143,6 +152,9 @@ export default {
     },
     onGridReady(params) {
       this.gridApi = params.api
+    },
+    redrawRows() {
+      this.gridApi.purgeInfiniteCache()
     },
     getRowStyle() {
       return {

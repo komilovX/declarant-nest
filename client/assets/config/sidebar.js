@@ -24,7 +24,7 @@ export const sidebarItems = [
     value: 'tasks',
   },
   {
-    name: 'Контракты',
+    name: 'Документы',
     icon: 'el-icon-s-management',
     link: '/contracts',
     value: 'contracts',
@@ -125,7 +125,7 @@ export const sidebarRoles = () => [
     disabled: true,
   },
   {
-    name: 'Контракты',
+    name: 'Документы',
     value: 'contracts',
     create: false,
     read: true,

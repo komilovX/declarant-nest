@@ -1,3 +1,5 @@
+import { DocumentType } from 'src/document-type/document-type.entity'
+
 export const notificationUtils = {
   orderCreated: (userName: string, orderId: number) => {
     return `${userName} добавил в систему новая заявка с номером ${orderId}`
@@ -5,16 +7,19 @@ export const notificationUtils = {
   orderGivenToYou: (userName: string, orderId: any) => {
     return `Новый заказ с id ${orderId} передал вам от ${userName}`
   },
-  documentGivenToYou: (docNumber, orderId) => {
-    return `Документ ${docNumber} в заявке ${orderId} дается вам`
+  documentGivenToYou: (documentType: DocumentType, orderId) => {
+    return `Документ ${documentType.name}-${documentType.number} в заявке ${orderId} дается вам`
   },
-  documentReturned: (docNumber, orderId) => {
-    return `Документ ${docNumber} в заявке ${orderId} вернулся`
+  documentReturned: (documentType: DocumentType, orderId) => {
+    return `Документ ${documentType.name}-${documentType.number} в заявке ${orderId} вернулся`
   },
-  documentAcepted: (docNumber, orderId) => {
-    return `Документ ${docNumber} в заявке ${orderId} закончил`
+  documentAcepted: (documentType: DocumentType, orderId) => {
+    return `Документ ${documentType.name}-${documentType.number} в заявке ${orderId} закончил`
   },
-  documentFinished: (docNumber, orderId) => {
-    return `Документ ${docNumber} в заявке ${orderId} принял`
+  documentFinished: (documentType: DocumentType, orderId) => {
+    return `Документ ${documentType.name}-${documentType.number} в заявке ${orderId} принял`
+  },
+  documentDone: (documentType: DocumentType, orderId) => {
+    return `Документ ${documentType.name}-${documentType.number} в заявке ${orderId} выполнено`
   },
 }

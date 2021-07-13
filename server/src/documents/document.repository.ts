@@ -1,11 +1,4 @@
-import {
-  EntityRepository,
-  getRepository,
-  In,
-  Like,
-  Raw,
-  Repository,
-} from 'typeorm'
+import { EntityRepository, getRepository, In, Raw, Repository } from 'typeorm'
 import { Document } from './document.entity'
 import {
   CreateDocumentDto,
@@ -113,7 +106,7 @@ export class DocumentRepository extends Repository<Document> {
     const { filter, sort, limit, page = 1 } = findOrderGridDto
 
     const filterColumns = {}
-    const filterArrays = []
+    const filterArrays = ['order.deleted = false', 'order.archived = false']
     Object.keys(filter).forEach((key) => {
       switch (key) {
         case 'documentType.number':

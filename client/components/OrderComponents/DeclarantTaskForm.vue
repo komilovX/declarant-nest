@@ -108,7 +108,6 @@ export default {
         documentTypeId: null,
         declarantId: null,
         expire: null,
-        type: null,
       },
       rules: {
         documentTypeId: [
@@ -157,6 +156,7 @@ export default {
           try {
             const formData = {
               ...this.declarantForm,
+              type: DocumenTypes.DECLARANT,
               orderId: this.orderId,
             }
             const document = await documentsStore.giveTask(formData)

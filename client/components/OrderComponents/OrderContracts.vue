@@ -18,6 +18,9 @@
           <div class="flex items-center">
             <span class="flex items-center mr-6">
               <span class="mr-2">{{ data.date | dateFormatter }}</span>
+              <span class="mr-2 overflow-text" :title="data.fileName">{{
+                data.fileName
+              }}</span>
               <a v-href="label" target="_blank" class="mr-2">
                 <img v-image="label" />
               </a>
@@ -31,6 +34,7 @@
 </template>
 
 <script>
+// import groupBy from 'lodash.groupby'
 import { contractStore } from '~/store'
 
 export default {
@@ -68,25 +72,31 @@ export default {
           clientId: this.clientId,
           shipperId: this.shipperId,
         })
-        if (documents) {
-          console.log(`documents`, documents)
-          documents = documents.map((contract) => {
+        // const doc = groupBy(documents, (val) => {
+        //   return val.document.documentType.id
+        // })
+        const doc = documents.map((doc) => {
+          const numbers = doc.shippers[0] ? doc.shippers[0].numbers : []
+          return {
+            documentType: doc.document.documentType,
+            numbers,
+          }
+        })
+        console.log(`doc`, doc)
+        if (doc) {
+          documents = doc.map((d) => {
             return {
-              name: `${contract.documentType.number} - ${contract.documentType.name}`,
-              id: contract.documentTypeId,
-              contractId: contract.id,
+              name: `${d.documentType.number} - ${d.documentType.name}`,
+              id: d.id,
+              numbers: d.numbers,
             }
           })
           return resolve(documents)
         }
       }
       if (node.level === 1) {
-        const { contractId } = node.data
-        const contract = await this.$axios.$get(
-          `/contract?contractId=${contractId}`
-        )
-        console.log(`contract`, contract)
-        const numbers = contract.map((data) => {
+        const { numbers } = node.data
+        const data = numbers.map((data) => {
           return {
             name: data.number,
             id: data.id,
@@ -94,7 +104,7 @@ export default {
           }
         })
 
-        resolve(numbers)
+        resolve(data)
       }
       if (node.level === 2) {
         const files = node.data.files.map((data) => {
@@ -102,6 +112,7 @@ export default {
             name: data.file,
             id: data.id,
             date: data.date,
+            fileName: data.name,
             leaf: true,
           }
         })

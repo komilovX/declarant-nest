@@ -19,7 +19,9 @@ export class UserNotification extends BaseEntity {
   @Column()
   userId: number
 
-  @ManyToOne(() => User, (user) => user.userNotifications)
+  @ManyToOne(() => User, (user) => user.userNotifications, {
+    onDelete: 'CASCADE',
+  })
   user: User
 
   @Column()

@@ -5,14 +5,18 @@ import { Shipper } from 'src/database/entities/shipper.entity'
 import { DocumentType } from 'src/document-type/document-type.entity'
 import { ContractController } from './contract.controller'
 import { ContractService } from './contract.service'
+import { ContractClient } from './entities/contract-clients'
+import { ContractDocuments } from './entities/contract-documents.entity'
 import { ContractFiles } from './entities/contract-files.entity'
 import { ContractNumbers } from './entities/contract-numbers.entity'
-import { Contract } from './entities/contract.entity'
+import { ContractShippers } from './entities/contract-shippers.entity'
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      Contract,
+      ContractClient,
+      ContractDocuments,
+      ContractShippers,
       ContractFiles,
       ContractNumbers,
       Client,
