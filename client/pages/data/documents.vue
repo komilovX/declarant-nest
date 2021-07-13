@@ -5,7 +5,7 @@
         <h2 class="mr-2 text-lg font-medium">Документы</h2>
         <app-add-button
           v-role:create="'data-documents'"
-          size="small"
+          size="mini"
           @on-click="dialogVisible = true"
         />
       </div>

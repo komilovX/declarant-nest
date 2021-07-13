@@ -2,17 +2,15 @@ import { dataStore, documentTypeStore, userStore } from '~/store'
 
 export const fetchOrderFilters = async () => {
   try {
-    if (!userStore.users.length) {
+    if (!userStore.isRequested) {
       await userStore.fetchUsers()
+      userStore.setRequested(true)
     }
-    if (!dataStore.shippers.length) {
+    if (!dataStore.isRequested) {
       await dataStore.fetchShippers()
-    }
-    if (!dataStore.clients.length) {
       await dataStore.fetchClients()
-    }
-    if (!dataStore.products.length) {
       await dataStore.fetchProducts()
+      dataStore.setRequested(true)
     }
   } catch (error) {
     console.log(error)
@@ -22,20 +20,18 @@ export const fetchOrderFilters = async () => {
 
 export const fetchTaskFilters = async () => {
   try {
-    if (!userStore.users.length) {
+    if (!userStore.isRequested) {
       await userStore.fetchUsers()
+      userStore.setRequested(true)
     }
     if (!dataStore.shippers.length) {
       await dataStore.fetchShippers()
-    }
-    if (!dataStore.clients.length) {
       await dataStore.fetchClients()
-    }
-    if (!dataStore.products.length) {
       await dataStore.fetchProducts()
     }
-    if (!documentTypeStore.documentTypes.length) {
+    if (!documentTypeStore.isRequested) {
       await documentTypeStore.fetchDocumentTypes()
+      documentTypeStore.setRequested(true)
     }
   } catch (error) {
     console.log(error)

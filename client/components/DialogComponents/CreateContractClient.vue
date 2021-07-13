@@ -1,25 +1,25 @@
 <template>
   <el-dialog
-    title="Добавление документов"
+    title="Добавление клиентнтов"
     :visible.sync="visible"
     :before-close="onClose"
     custom-class="w-96"
   >
     <el-form
-      ref="contractForm"
+      ref="contractClientForm"
       :model="contractForm"
       :rules="rules"
       label-position="top"
     >
-      <el-form-item label="Документ" prop="documentTypeId">
+      <el-form-item label="Клиенти" prop="clientId">
         <el-select
-          v-model="contractForm.documentTypeId"
+          v-model="contractForm.clientId"
           filterable
-          placeholder="Документ"
+          placeholder="Клиент"
           style="width: 100%"
         >
           <el-option
-            v-for="item in documents"
+            v-for="item in clients"
             :key="item.id"
             :label="item.name"
             :value="item.id"
@@ -32,7 +32,7 @@
           type="primary"
           size="small"
           :loading="contractStore.loading"
-          @click="submitClientForm('contractForm')"
+          @click="submitClientForm('contractClientForm')"
         >
           Добавить
         </el-button>
@@ -55,7 +55,11 @@ export default {
       type: Function,
       required: true,
     },
-    documents: {
+    documentTypeId: {
+      type: Number,
+      required: true,
+    },
+    clients: {
       type: Array,
       default: () => [],
     },
@@ -64,9 +68,9 @@ export default {
     return {
       contractStore,
       contractForm: {
-        documentTypeId: null,
+        clientId: null,
       },
-      rules: mapRulesByValue(['documentTypeId']),
+      rules: mapRulesByValue(['clientId']),
     }
   },
   methods: {
@@ -74,9 +78,13 @@ export default {
       this.$refs[formName].validate(async (valid) => {
         if (valid) {
           try {
-            const res = await this.contractStore.addContract(this.contractForm)
+            const data = {
+              clientId: this.contractForm.clientId,
+              documentTypeId: this.documentTypeId,
+            }
+            const res = await this.contractStore.addContractClient(data)
             this.$refs[formName].resetFields()
-            this.$emit('contractDocumentAdded', res)
+            this.$emit('contractClientAdded', res)
             this.$message.success('Контракт успешно добавлен')
           } catch (e) {}
         } else {

@@ -10,7 +10,13 @@ import { DocumentTypesI } from '~/utils/types'
 })
 class DocumentType extends VuexModule {
   loading: boolean = false
+  isRequested: boolean = false
   documentTypes: DocumentTypesI[] = []
+
+  @Mutation
+  setRequested(requested: boolean) {
+    this.isRequested = requested
+  }
 
   @Mutation
   setLoading(loading: boolean) {

@@ -20,13 +20,13 @@
       >
         <template slot-scope="{ row: { files } }">
           <span v-if="!files">-</span>
-          <div v-else>
+          <div v-else class="flex justify-center">
             <a
               v-for="(file, idx) in files"
               :key="idx"
               v-href="file"
               target="_blank"
-              class="mr-2 flex justify-center max-h-12 p-1"
+              class="mr-1 flex justify-center max-h-12 p-1"
             >
               <img v-image="file" />&nbsp;
             </a>

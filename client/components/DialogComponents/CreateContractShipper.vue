@@ -1,25 +1,25 @@
 <template>
   <el-dialog
-    title="Добавление документов"
+    title="Добавление грузоотправителов"
     :visible.sync="visible"
     :before-close="onClose"
     custom-class="w-96"
   >
     <el-form
-      ref="contractForm"
+      ref="contractShipperForm"
       :model="contractForm"
       :rules="rules"
       label-position="top"
     >
-      <el-form-item label="Документ" prop="documentTypeId">
+      <el-form-item label="Грузоотправители" prop="shipperId">
         <el-select
-          v-model="contractForm.documentTypeId"
+          v-model="contractForm.shipperId"
           filterable
-          placeholder="Документ"
+          placeholder="Грузоотправители"
           style="width: 100%"
         >
           <el-option
-            v-for="item in documents"
+            v-for="item in shippers"
             :key="item.id"
             :label="item.name"
             :value="item.id"
@@ -32,7 +32,7 @@
           type="primary"
           size="small"
           :loading="contractStore.loading"
-          @click="submitClientForm('contractForm')"
+          @click="submitShipperForm('contractShipperForm')"
         >
           Добавить
         </el-button>
@@ -55,7 +55,11 @@ export default {
       type: Function,
       required: true,
     },
-    documents: {
+    clientId: {
+      type: Number,
+      required: true,
+    },
+    shippers: {
       type: Array,
       default: () => [],
     },
@@ -64,19 +68,23 @@ export default {
     return {
       contractStore,
       contractForm: {
-        documentTypeId: null,
+        shipperId: null,
       },
-      rules: mapRulesByValue(['documentTypeId']),
+      rules: mapRulesByValue(['shipperId']),
     }
   },
   methods: {
-    submitClientForm(formName) {
+    submitShipperForm(formName) {
       this.$refs[formName].validate(async (valid) => {
         if (valid) {
           try {
-            const res = await this.contractStore.addContract(this.contractForm)
+            const data = {
+              clientId: this.clientId,
+              shipperId: this.contractForm.shipperId,
+            }
+            const res = await this.contractStore.addContractShipper(data)
             this.$refs[formName].resetFields()
-            this.$emit('contractDocumentAdded', res)
+            this.$emit('contractShipperForm', res)
             this.$message.success('Контракт успешно добавлен')
           } catch (e) {}
         } else {

@@ -10,8 +10,14 @@ import { UsersI } from '~/utils/types'
 })
 class Users extends VuexModule {
   loading: boolean = false
+  isRequested: boolean = false
   users: UsersI[] = []
   user: UsersI | null = null
+
+  @Mutation
+  setRequested(requested: boolean) {
+    this.isRequested = requested
+  }
 
   @Mutation
   setLoading(loading: boolean) {

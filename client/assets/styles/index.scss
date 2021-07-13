@@ -1,5 +1,11 @@
 @import './tailwand';
 @import './ag-grid.scss';
+
+@media print {
+  @page {
+    margin: 10px 10px 0 20px;
+  }
+}
 .active-class {
   color: rgb(37, 99, 235);
   i {
@@ -9,12 +15,22 @@
 .navbar-icon {
   font-size: 22px;
 }
+.el-badge__content.is-fixed {
+  top: 5px;
+  right: 20px;
+}
+.el-card__header {
+  padding: 4px 8px;
+}
+.el-card__body {
+  padding: 8px 15px;
+}
 .el-table {
   td {
     padding: 2px 0;
   }
   td .cell {
-    font-size: 16px!important;
+    font-size: 16px !important;
   }
 }
 .custom-tree-node {
@@ -28,6 +44,9 @@
   padding: 5px 10px;
   color: white;
   background: #374151;
+}
+.el-collapse-item__content {
+  padding-bottom: 0px;
 }
 .el-table__expanded-cell {
   padding: 10px 50px;
@@ -44,4 +63,11 @@
 }
 .el-table .finished-row {
   background-color: #f0f9eb;
+}
+
+.overflow-text {
+  width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; // This is where the magic happens
 }

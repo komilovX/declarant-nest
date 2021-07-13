@@ -10,12 +10,15 @@
         <data-grid
           :fetch-data="fetchNewTasks"
           :column-defs="orderTableColumn"
+          :cellStyle="gridCellStyle"
         />
       </el-tab-pane>
       <el-tab-pane label="Законченный">
         <data-grid
           :fetch-data="fetchFinishedTasks"
           :column-defs="orderTableColumn"
+          :cellStyle="gridCellStyle"
+          :height="70"
         />
       </el-tab-pane>
     </el-tabs>
@@ -29,12 +32,13 @@ import { authStore, dataStore, documentTypeStore, userStore } from '~/store'
 import { DocumentStatus } from '~/utils/data'
 import OrderTaskStatuses from '~/components/OrderComponents/OrderTaskStatuses.vue'
 import { fetchTaskFilters } from '~/utils/fetch-service'
-
+import { gridCellStyle } from '~/utils/order.util.js'
 export default {
   components: { DataGrid, OrderTaskStatuses },
   middleware: ['admin-auth'],
   data: () => {
     return {
+      gridCellStyle,
       order_id: 0,
       newDeclarant: '',
     }

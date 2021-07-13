@@ -137,7 +137,7 @@ export default {
       return this.documents.filter(
         (doc) =>
           doc.type === DocumenTypes.DECLARANT &&
-          doc.creator?.id !== authStore.user.id
+          doc.declarantId === authStore.user.id
       )
     },
   },

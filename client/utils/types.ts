@@ -109,3 +109,9 @@ export interface OrdersI {
   archived: boolean
   deleted: boolean
 }
+
+export interface NotificationI {
+  id?: number
+  date: Date
+  message: string
+}

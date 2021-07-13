@@ -81,6 +81,7 @@ class Contracts extends VuexModule {
 
       this.setContract(contract)
       this.setLoading(false)
+      return contract
     } catch (error) {
       this.setLoading(false)
       errorStore.setError(error)
@@ -89,10 +90,47 @@ class Contracts extends VuexModule {
   }
 
   @Action({ rawError: true })
-  async addContractNumber({ id, number }: { id: number; number: string }) {
+  async addContractNumber({
+    shipperId,
+    number,
+  }: {
+    shipperId: number
+    number: string
+  }) {
     try {
       this.setLoading(true)
-      const contract = await $axios.$put(`/contract/number/${id}`, { number })
+      const contract = await $axios.$post(`/contract/number`, {
+        shipperId,
+        number,
+      })
+      this.setLoading(false)
+      return contract
+    } catch (error) {
+      this.setLoading(false)
+      errorStore.setError(error)
+      throw error
+    }
+  }
+
+  @Action({ rawError: true })
+  async addContractClient(data: { documentTypeId: number; clientId: string }) {
+    try {
+      this.setLoading(true)
+      const contract = await $axios.$post(`/contract/client`, data)
+      this.setLoading(false)
+      return contract
+    } catch (error) {
+      this.setLoading(false)
+      errorStore.setError(error)
+      throw error
+    }
+  }
+
+  @Action({ rawError: true })
+  async addContractShipper(data: { shipperId: number; clientId: number }) {
+    try {
+      this.setLoading(true)
+      const contract = await $axios.$post(`/contract/shipper`, data)
       this.setLoading(false)
       return contract
     } catch (error) {
@@ -107,6 +145,48 @@ class Contracts extends VuexModule {
     try {
       this.setLoading(true)
       const number = await $axios.$delete(`/contract/number/${id}`)
+      this.setLoading(false)
+      return number
+    } catch (error) {
+      this.setLoading(false)
+      errorStore.setError(error)
+      throw error
+    }
+  }
+
+  @Action({ rawError: true })
+  async deleteContractClient(id: number) {
+    try {
+      this.setLoading(true)
+      const number = await $axios.$delete(`/contract/client/${id}`)
+      this.setLoading(false)
+      return number
+    } catch (error) {
+      this.setLoading(false)
+      errorStore.setError(error)
+      throw error
+    }
+  }
+
+  @Action({ rawError: true })
+  async deleteContractShipper(id: number) {
+    try {
+      this.setLoading(true)
+      const number = await $axios.$delete(`/contract/shipper/${id}`)
+      this.setLoading(false)
+      return number
+    } catch (error) {
+      this.setLoading(false)
+      errorStore.setError(error)
+      throw error
+    }
+  }
+
+  @Action({ rawError: true })
+  async deleteContractDocument(id: number) {
+    try {
+      this.setLoading(true)
+      const number = await $axios.$delete(`/contract/document/${id}`)
       this.setLoading(false)
       return number
     } catch (error) {

@@ -71,11 +71,11 @@
                 class="flex justify-center"
               >
                 <span v-if="!files">-</span>
-                <div v-else>
+                <div v-else class="flex">
                   <div
                     v-for="(file, idx) in files"
                     :key="idx"
-                    class="flex justify-center"
+                    class="flex justify-center mr-1"
                   >
                     <a
                       v-href="file"
@@ -562,9 +562,13 @@ export default {
     },
     async updateIncomingDocument(row) {
       try {
+        const data = {
+          number: row.number,
+          price: row.price.filter((p) => p.price),
+        }
         await this.documentsStore.updateDocument({
           id: row.id,
-          data: row,
+          data,
         })
         this.$message.success('Заявки успешна обнавлена')
       } catch (error) {

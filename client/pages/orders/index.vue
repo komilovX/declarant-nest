@@ -4,12 +4,17 @@
       <h2 class="mr-2 text-lg font-medium">Заявки</h2>
       <app-add-button
         v-role:create="'orders'"
-        size="small"
+        size="mini"
         @on-click="$router.push('/orders/create-order')"
       />
     </div>
     <hr class="my-2" />
-    <data-grid :fetch-data="fetchData" :column-defs="orderTableColumn" />
+    <data-grid
+      ref="dataGrid"
+      :fetch-data="fetchData"
+      :column-defs="orderTableColumn"
+      :height="74"
+    />
   </div>
 </template>
 
@@ -17,7 +22,7 @@
 import DataGrid from '../../components/DataGrid'
 import ActionRenderer from '../../components/AgGrid/ActionsRenderer'
 import OrderStatus from '../../components/AgGrid/OrderStatus'
-import { authStore, dataStore, userStore } from '~/store'
+import { authStore, dataStore, ordersStore, userStore } from '~/store'
 import { statuses } from '~/utils/data'
 import { fetchOrderFilters } from '~/utils/fetch-service'
 export default {
@@ -45,6 +50,11 @@ export default {
       await fetchOrderFilters()
     } catch (err) {
       error(err)
+    }
+  },
+  head() {
+    return {
+      title: 'Заявки',
     }
   },
   computed: {
@@ -254,8 +264,11 @@ export default {
       })
         .then(async () => {
           try {
-            await this.$axios.$put(`api/orders/${id}/delete`)
-            this.orders = this.orders.filter((o) => o.id != id)
+            await ordersStore.updateOrderItems({
+              id,
+              data: { deleted: true },
+            })
+            this.$refs.dataGrid.redrawRows()
           } catch (e) {
             console.log(e)
           }

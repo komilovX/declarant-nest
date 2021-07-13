@@ -134,6 +134,9 @@ export default Vue.extend({
       }
     },
   },
+  mounted() {
+    this.clearForms()
+  },
   methods: {
     setRole() {
       const sitePages = sidebarRoles()

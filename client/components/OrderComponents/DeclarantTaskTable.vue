@@ -110,31 +110,22 @@ export default {
   },
   methods: {
     updateStatus(status, id) {
-      this.$confirm(
-        'Уверены, что хотите возвращать этот документ?',
-        'Подтверждение',
-        {
-          confirmButtonText: 'Да',
-          cancelButtonText: 'Отменить',
-          type: 'warning',
-        }
-      )
-        .then(async () => {
-          try {
-            const data = {
-              status,
-              orderId: this.orderId,
-            }
-            console.log(`data`, data)
-            const document = await documentsStore.updateDocument({
-              id,
-              data,
-            })
-            this.$emit('documentUpdated', document)
-            this.$message.success('Документ успешно обновлен')
-          } catch (e) {
-            console.log(e)
+      this.$prompt('Почему вы возвращаете этот документ', 'Подтверждение', {
+        confirmButtonText: 'Отправить',
+        cancelButtonText: 'Отменить',
+      })
+        .then(async ({ value }) => {
+          const data = {
+            status,
+            orderId: this.orderId,
+            returnText: value,
           }
+          const document = await documentsStore.updateDocument({
+            id,
+            data,
+          })
+          this.$emit('documentUpdated', document)
+          this.$message.success('Документ успешно обновлен')
         })
         .catch(() => {})
     },
