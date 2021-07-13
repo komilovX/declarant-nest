@@ -1,10 +1,9 @@
-import { Contract } from 'src/contract/entities/contract.entity'
+import { ContractShippers } from 'src/contract/entities/contract-shippers.entity'
 import { Order } from 'src/orders/entities/order.entity'
 import {
   BaseEntity,
   Column,
   Entity,
-  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm'
@@ -20,6 +19,9 @@ export class Shipper extends BaseEntity {
   @OneToMany(() => Order, (order) => order.shipper)
   orders: Order[]
 
-  @ManyToOne(() => Contract, (contract) => contract.shipper)
-  contracts: Contract[]
+  @OneToMany(
+    () => ContractShippers,
+    (contractShippers) => contractShippers.shipper,
+  )
+  contracts: ContractShippers[]
 }

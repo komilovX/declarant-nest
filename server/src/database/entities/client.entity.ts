@@ -1,4 +1,4 @@
-import { Contract } from 'src/contract/entities/contract.entity'
+import { ContractClient } from 'src/contract/entities/contract-clients'
 import { Order } from 'src/orders/entities/order.entity'
 import {
   BaseEntity,
@@ -28,8 +28,8 @@ export class Client extends BaseEntity {
   @OneToMany(() => Order, (order) => order.client)
   orders: Order[]
 
-  @ManyToOne(() => Contract, (contract) => contract.client)
-  contracts: Contract[]
+  @ManyToOne(() => ContractClient, (contractClient) => contractClient.client)
+  contracts: ContractClient[]
 
   @JoinColumn()
   @OneToMany(

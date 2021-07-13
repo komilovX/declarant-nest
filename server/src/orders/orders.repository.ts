@@ -90,6 +90,7 @@ export class OrdersRepository extends Repository<Order> {
     const conditions = {
       declarantId: user.id,
       archived: false,
+      deleted: false,
       ...filterColumns,
     }
 

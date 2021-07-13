@@ -6,17 +6,28 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Client } from 'src/database/entities/client.entity'
 import { Shipper } from 'src/database/entities/shipper.entity'
 import { DocumentType } from 'src/document-type/document-type.entity'
-import { Connection, getRepository, Repository } from 'typeorm'
-import { CreateContractDto } from './contract.dto'
+import { Connection, Repository } from 'typeorm'
+import {
+  ContractNumberDto,
+  CreateContractClientDto,
+  CreateContractDto,
+  CreateContractShipperDto,
+} from './contract.dto'
+import { ContractClient } from './entities/contract-clients'
+import { ContractDocuments } from './entities/contract-documents.entity'
 import { ContractFiles } from './entities/contract-files.entity'
 import { ContractNumbers } from './entities/contract-numbers.entity'
-import { Contract } from './entities/contract.entity'
+import { ContractShippers } from './entities/contract-shippers.entity'
 
 @Injectable()
 export class ContractService {
   constructor(
-    @InjectRepository(Contract)
-    private readonly contractRepository: Repository<Contract>,
+    @InjectRepository(ContractDocuments)
+    private readonly contractDocumentsRepository: Repository<ContractDocuments>,
+    @InjectRepository(ContractClient)
+    private readonly contractClientRepository: Repository<ContractClient>,
+    @InjectRepository(ContractShippers)
+    private readonly contractShippersRepository: Repository<ContractShippers>,
     @InjectRepository(Client)
     private readonly clientRepository: Repository<Client>,
     @InjectRepository(DocumentType)
@@ -31,48 +42,32 @@ export class ContractService {
   ) {}
 
   async findAllContracts() {
-    return this.connection
-      .createQueryBuilder()
-      .select('contract.documentTypeId')
-      .from(Contract, 'contract')
-      .distinctOn(['contract.documentTypeId'])
-      .leftJoinAndSelect('contract.documentType', 'document')
-      .getMany()
+    return this.contractDocumentsRepository.find()
   }
 
-  async findAllContractsForOrder(clientId, shipperId) {
-    return getRepository(Contract)
-      .createQueryBuilder('contract')
-      .select(['contract.documentTypeId', 'contract.id'])
-      .distinctOn(['contract.documentTypeId'])
-      .leftJoinAndSelect('contract.documentType', 'document')
-      .leftJoin('contract.shipper', 'shipper')
-      .leftJoin('contract.client', 'client')
-      .where('shipper.id = :shipperId AND client.id = :clientId', {
-        clientId,
-        shipperId,
-      })
-      .getMany()
-  }
-
-  async findAllClientsById(documentTypeId: number) {
-    return this.contractRepository.find({
-      select: ['documentTypeId'],
-      relations: ['client'],
-      where: { documentTypeId },
+  async findContractClients(documentTypeId: number) {
+    return this.contractClientRepository.find({
+      relations: ['document'],
+      where: {
+        document: {
+          id: documentTypeId,
+        },
+      },
     })
   }
 
-  async findAllShippersById(documentTypeId: number, clientId: number) {
-    return this.contractRepository.find({
-      select: ['documentTypeId', 'id'],
-      relations: ['client', 'shipper'],
-      where: { documentTypeId, client: { id: clientId } },
+  async findContractShippers(clientId: number) {
+    return this.contractShippersRepository.find({
+      relations: ['shipper'],
+      where: {
+        client: {
+          id: clientId,
+        },
+      },
     })
   }
 
   findAllNumbersByContractId(contractId: number) {
-    console.log(`contractId`, contractId)
     return this.connection
       .createQueryBuilder()
       .select('contractNumber.id')
@@ -85,13 +80,27 @@ export class ContractService {
       .getMany()
   }
 
-  async createContract(createContractDto: CreateContractDto) {
-    const { clientId, documentTypeId, shipperId } = createContractDto
+  findAllContractsForOrder(clientId: number, shipperId: number) {
+    return this.connection
+      .createQueryBuilder()
+      .select('contractClient.id')
+      .from(ContractClient, 'contractClient')
+      .leftJoinAndSelect('contractClient.document', 'document')
+      .leftJoinAndSelect('document.documentType', 'documentType')
+      .leftJoin('contractClient.client', 'client')
+      .leftJoinAndSelect('contractClient.shippers', 'shippers')
+      .leftJoin('shippers.shipper', 'shipper')
+      .leftJoinAndSelect('shippers.numbers', 'numbers')
+      .leftJoinAndSelect('numbers.files', 'files')
+      .where('shipper.id = :shipperId AND client.id = :clientId', {
+        shipperId,
+        clientId,
+      })
+      .getMany()
+  }
 
-    const client = await this.clientRepository.findOne(clientId)
-    if (!client) {
-      throw new NotFoundException(`Client with ${clientId} is not found`)
-    }
+  async createContract(createContractDto: CreateContractDto) {
+    const { documentTypeId } = createContractDto
 
     const documentType = await this.documentTypeRepository.findOne(
       documentTypeId,
@@ -102,34 +111,95 @@ export class ContractService {
       )
     }
 
+    const contract = this.contractDocumentsRepository.create({
+      documentType,
+    })
+
+    return this.contractDocumentsRepository.save(contract)
+  }
+
+  async createContractClient(dto: CreateContractClientDto) {
+    const { documentTypeId, clientId } = dto
+
+    const document = await this.contractDocumentsRepository.findOne({
+      documentTypeId,
+    })
+    if (!document) {
+      throw new NotFoundException(
+        `Document with ${documentTypeId} is not found`,
+      )
+    }
+
+    const client = await this.clientRepository.findOne(clientId)
+
+    const contractClient = this.contractClientRepository.create({
+      document,
+      client,
+    })
+
+    return this.contractClientRepository.save(contractClient)
+  }
+
+  async deleteContractDocument(id: number) {
+    const document = await this.contractDocumentsRepository.findOne(id)
+
+    if (!document) {
+      throw new NotFoundException(`document with #${id} is not found`)
+    }
+    return this.contractDocumentsRepository.remove(document)
+  }
+
+  async deleteContractClient(id: number) {
+    const client = await this.contractClientRepository.findOne(id)
+
+    if (!client) {
+      throw new NotFoundException(`client with #${id} is not found`)
+    }
+    return this.contractClientRepository.remove(client)
+  }
+
+  async deleteContractShipper(id: number) {
+    const shipper = await this.contractShippersRepository.findOne(id)
+
+    if (!shipper) {
+      throw new NotFoundException(`client with #${id} is not found`)
+    }
+    return this.contractShippersRepository.remove(shipper)
+  }
+
+  async createContractShipper(dto: CreateContractShipperDto) {
+    const { shipperId, clientId } = dto
+
     const shipper = await this.shipperRepository.findOne(shipperId)
     if (!shipper) {
       throw new NotFoundException(`Shipper with ${shipperId} is not found`)
     }
 
-    const contract = this.contractRepository.create({
-      documentType,
+    const client = await this.contractClientRepository.findOne(clientId)
+    if (!client) {
+      throw new NotFoundException(`Client with ${clientId} is not found`)
+    }
+
+    const contractShipper = this.contractShippersRepository.create({
       client,
       shipper,
     })
 
-    return this.contractRepository.save(contract)
+    return this.contractShippersRepository.save(contractShipper)
   }
 
-  async addNumberContract(id: number, number: string) {
-    const contract = await this.contractRepository.preload({
-      id,
-    })
+  async addContractNumber(contractNumberDto: ContractNumberDto) {
+    const { shipperId, number } = contractNumberDto
+    const shipper = await this.contractShippersRepository.findOne(shipperId)
 
-    if (!contract) {
-      throw new NotFoundException(`Contract with id #${id} is not found`)
+    if (!shipper) {
+      throw new NotFoundException(`shipper with #${shipperId} is not found`)
     }
-
-    const newNumber = this.contractNumberRepository.create({ number })
-    contract.numbers = contract.numbers.concat(newNumber)
-    await this.contractRepository.save(contract)
-
-    return newNumber
+    const contractNumber = this.contractNumberRepository.create({
+      contract: shipper,
+      number,
+    })
+    return this.contractNumberRepository.save(contractNumber)
   }
 
   async deleteContractNumber(id: number) {
@@ -141,14 +211,15 @@ export class ContractService {
     return this.contractNumberRepository.remove(number)
   }
 
-  async addContractFile(fileName: string, id: number) {
+  async addContractFile(file: Express.Multer.File, id: number) {
     const number = await this.contractNumberRepository.preload({ id })
 
     if (!number) {
       throw new NotFoundException(`Number with #${id} is not found`)
     }
     const newFile = this.contractFileRepository.create({
-      file: fileName,
+      file: file.filename,
+      name: file.originalname,
       date: new Date(),
     })
     number.files = number.files.concat([newFile])

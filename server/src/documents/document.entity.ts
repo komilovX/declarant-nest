@@ -62,6 +62,9 @@ export class Document extends BaseEntity {
   @Column({ nullable: true })
   expire: Date
 
+  @Column({ nullable: true })
+  returnText: string
+
   @JoinColumn()
   @OneToMany(() => DocumentPrice, (documentPrice) => documentPrice.document, {
     cascade: true,

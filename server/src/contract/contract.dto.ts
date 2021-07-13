@@ -4,12 +4,30 @@ import { IsNotEmpty } from 'class-validator'
 export class CreateContractDto {
   @IsNotEmpty()
   documentTypeId: number
-
-  @IsNotEmpty()
-  clientId: number
-
-  @IsNotEmpty()
-  shipperId: number
 }
 
 export class UpdateContractDto extends PartialType(CreateContractDto) {}
+
+export class CreateContractClientDto {
+  @IsNotEmpty()
+  documentTypeId: number
+
+  @IsNotEmpty()
+  clientId: number
+}
+
+export class CreateContractShipperDto {
+  @IsNotEmpty()
+  shipperId: number
+
+  @IsNotEmpty()
+  clientId: number
+}
+
+export class ContractNumberDto {
+  @IsNotEmpty()
+  shipperId: number
+
+  @IsNotEmpty()
+  number: string
+}

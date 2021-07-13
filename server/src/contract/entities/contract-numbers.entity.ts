@@ -7,8 +7,8 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm'
-import { Contract } from './contract.entity'
 import { ContractFiles } from './contract-files.entity'
+import { ContractShippers } from './contract-shippers.entity'
 
 @Entity()
 export class ContractNumbers extends BaseEntity {
@@ -18,8 +18,13 @@ export class ContractNumbers extends BaseEntity {
   @Column()
   number: string
 
-  @ManyToOne(() => Contract, (contract) => contract.numbers)
-  contract: Contract
+  @JoinColumn()
+  @ManyToOne(
+    () => ContractShippers,
+    (contractShippers) => contractShippers.numbers,
+    { onDelete: 'CASCADE' },
+  )
+  contract: ContractShippers
 
   @JoinColumn()
   @OneToMany(
@@ -28,7 +33,6 @@ export class ContractNumbers extends BaseEntity {
     {
       cascade: true,
       eager: true,
-      onDelete: 'CASCADE',
     },
   )
   files: ContractFiles[]

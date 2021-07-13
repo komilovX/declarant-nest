@@ -1,4 +1,4 @@
-import { Contract } from 'src/contract/entities/contract.entity'
+import { ContractDocuments } from 'src/contract/entities/contract-documents.entity'
 import { Department } from 'src/database/entities/department.entity'
 import { Document } from 'src/documents/document.entity'
 
@@ -35,8 +35,8 @@ export class DocumentType extends BaseEntity {
   })
   departments: Department[]
 
-  @OneToMany(() => Contract, (contract) => contract.documentType)
-  contracts: Contract[]
+  @OneToMany(() => ContractDocuments, (contract) => contract.documentType)
+  contracts: ContractDocuments[]
 
   @OneToMany(() => Document, (document) => document.documentType)
   documents: Document[]

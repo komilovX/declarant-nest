@@ -1,32 +1,29 @@
-import { Client } from 'src/database/entities/client.entity'
 import { Shipper } from 'src/database/entities/shipper.entity'
-import { DocumentType } from 'src/document-type/document-type.entity'
 import {
   BaseEntity,
-  Column,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm'
+import { ContractClient } from './contract-clients'
 import { ContractNumbers } from './contract-numbers.entity'
 
 @Entity()
-export class Contract extends BaseEntity {
+export class ContractShippers extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number
 
-  @Column()
-  documentTypeId: number
-
   @JoinColumn()
-  @ManyToOne(() => DocumentType, (documentType) => documentType)
-  documentType: DocumentType
-
-  @JoinColumn()
-  @ManyToOne(() => Client, (client) => client.contracts)
-  client: Client
+  @ManyToOne(
+    () => ContractClient,
+    (contractClient) => contractClient.shippers,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
+  client: ContractClient
 
   @JoinColumn()
   @ManyToOne(() => Shipper, (shipper) => shipper.contracts)

@@ -32,7 +32,7 @@ export class StatisticsService {
             'archived',
           )
           .addSelect(
-            'COUNT(case order.archived when false then 1 else null end)',
+            'COUNT(case when order.archived = true then null when order.deleted = true then null else 1 end)',
             'active',
           )
           .where('order.declarantId = :id', { id: user.id })
