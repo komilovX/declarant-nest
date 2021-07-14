@@ -6,14 +6,6 @@
         @click="$router.back()"
       />
       <h2 class="text-xl font-medium mr-4">#{{ $route.params.id }}</h2>
-      <el-button
-        v-role:update="'orders'"
-        type="primary"
-        size="mini"
-        @click="$router.push(`/orders/${order.id}`)"
-      >
-        Изменить <i class="header-icon el-icon-edit" />
-      </el-button>
     </div>
     <el-row :gutter="20" class="p1">
       <el-col :span="24" :md="10" :sm="24">
