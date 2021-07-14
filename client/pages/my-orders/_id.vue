@@ -172,9 +172,7 @@ export default {
     },
     declarantDocuments() {
       return this.documents.filter(
-        (doc) =>
-          doc.type === DocumenTypes.DECLARANT &&
-          doc.creator?.id === authStore.user.id
+        (doc) => doc.type === DocumenTypes.DECLARANT && doc.declarantId
       )
     },
     declarantDocumentTypes() {

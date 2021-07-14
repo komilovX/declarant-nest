@@ -1,6 +1,9 @@
 export default {
   ssr: false,
-
+  server: {
+    port: 3000,
+    // host: "207.154.223.158"
+  },
   head: {
     title: 'client',
     meta: [
