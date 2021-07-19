@@ -65,6 +65,9 @@ export class Document extends BaseEntity {
   @Column({ nullable: true })
   returnText: string
 
+  @Column({ nullable: true })
+  taskText: string
+
   @JoinColumn()
   @OneToMany(() => DocumentPrice, (documentPrice) => documentPrice.document, {
     cascade: true,

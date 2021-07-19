@@ -54,7 +54,7 @@ export class DocumentsService {
       relations: ['order'],
       where: { id },
     })
-    console.log(`updateDocumentDto`, updateDocumentDto)
+
     const document = this.documentRepository.updateDocument(
       id,
       updateDocumentDto,
