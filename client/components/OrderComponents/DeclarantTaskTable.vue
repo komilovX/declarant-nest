@@ -6,6 +6,13 @@
     :row-class-name="tableRowClassName"
     size="mini"
   >
+    <el-table-column type="expand">
+      <template slot-scope="{ row }">
+        <p>Создан: {{ row.createdAt | dateFormatter }}</p>
+        <p>Cоздатель: {{ row.creator && row.creator.name }}</p>
+        <p>Заметка: {{ row.taskText }}</p>
+      </template>
+    </el-table-column>
     <el-table-column min-width="70" label="№" align="center">
       <template slot-scope="{ row: { documentType } }">
         {{ documentType && documentType.number }}

@@ -50,7 +50,7 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="24" :md="8" :sm="24">
+        <el-col :span="24" :md="7" :sm="24">
           <el-form-item prop="declarantId">
             <el-select
               v-model="declarantForm.declarantId"
@@ -65,6 +65,15 @@
                 :value="s.id"
               />
             </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="24" :md="7" :sm="24">
+          <el-form-item prop="taskText">
+            <el-input
+              v-model="declarantForm.taskText"
+              size="small"
+              placeholder="Заметка"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="24" :md="4" :sm="18" class="mb1">
@@ -113,6 +122,7 @@ export default {
         documentTypeId: null,
         declarantId: null,
         type: null,
+        taskText: null,
       },
       rules: {
         documentTypeId: [
@@ -145,6 +155,7 @@ export default {
       if (Object.keys(this.document).length) {
         this.declarantForm.declarantId = this.document?.declarant?.id
         this.declarantForm.documentTypeId = this.document?.documentType?.id
+        this.declarantForm.taskText = this.document?.taskText
       }
     },
     setDocumentType(val) {

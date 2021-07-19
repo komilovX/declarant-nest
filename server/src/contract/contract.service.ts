@@ -122,7 +122,7 @@ export class ContractService {
     const { documentTypeId, clientId } = dto
 
     const document = await this.contractDocumentsRepository.findOne({
-      documentTypeId,
+      id: documentTypeId,
     })
     if (!document) {
       throw new NotFoundException(

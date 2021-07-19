@@ -17,7 +17,7 @@ export class DocumentPrice extends BaseEntity {
   })
   document: Document
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'float' })
   price: number
 
   @Column({ nullable: true })

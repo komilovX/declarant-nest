@@ -54,4 +54,7 @@ export class GiveTaskDocumentDto {
 
   @IsString()
   type: DocumentTypes
+
+  @IsOptional()
+  taskText?: string
 }

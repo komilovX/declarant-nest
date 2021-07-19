@@ -22,6 +22,16 @@
         ></path>
       </svg>
     </button>
+    <div class="flex items-center pl-4">
+      <el-breadcrumb separator-class="el-icon-arrow-right">
+        <el-breadcrumb-item v-for="(item, index) in breadcrumb" :key="index">
+          <nuxt-link v-if="item.link" :to="item.link">{{
+            item.name
+          }}</nuxt-link>
+          <span v-else>{{ item.name }}</span>
+        </el-breadcrumb-item>
+      </el-breadcrumb>
+    </div>
     <div class="flex-1 px-4 flex justify-end">
       <h2 class="self-center text-lg">
         {{ authStore && authStore.user && authStore.user.name }}
@@ -77,10 +87,10 @@
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import Vue from 'vue'
+import { sidebarItems } from '@/assets/config/sidebar'
 import { authStore } from '~/store'
-
 export default Vue.extend({
   props: {
     notifyCount: {
@@ -90,9 +100,19 @@ export default Vue.extend({
   },
   data() {
     return {
+      breadcrumb: [],
       open: false,
       authStore,
     }
+  },
+  watch: {
+    $route() {
+      this.breadcrumb = []
+      this.getBreadCrumb()
+    },
+  },
+  mounted() {
+    this.getBreadCrumb()
   },
   methods: {
     logOut() {
@@ -114,6 +134,28 @@ export default Vue.extend({
           }
         })
         .catch(() => {})
+    },
+    getBreadCrumb() {
+      const matched = this.$route.matched.filter((route) => route.name)
+      const first = matched[0]
+      if (first && first.name === 'index') {
+        this.breadcrumb = [{ name: 'Главная' }]
+      } else {
+        this.breadcrumb.push({ name: 'Главная', link: '/' })
+        let sidebar = []
+        sidebarItems.forEach((s) => {
+          if (s.childs) {
+            sidebar = sidebar.concat(s.childs)
+            sidebar.push(s)
+          } else {
+            sidebar.push(s)
+          }
+        })
+        matched.forEach((item) => {
+          const route = sidebar.find((s) => s.value === item.name)
+          this.breadcrumb.push({ name: route.name, link: route.link })
+        })
+      }
     },
   },
 })

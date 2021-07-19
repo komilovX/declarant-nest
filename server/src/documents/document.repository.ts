@@ -196,6 +196,7 @@ export class DocumentRepository extends Repository<Document> {
       declarantId,
       type,
       expire,
+      taskText,
     } = giveTaskDocumentDto
 
     const order = await this.orderRepository.findOne(orderId)
@@ -224,6 +225,7 @@ export class DocumentRepository extends Repository<Document> {
     document.type = type
     document.expire = expire
     document.status = DocumentStatus.TASK
+    document.taskText = taskText
     return this.save(document)
   }
 
