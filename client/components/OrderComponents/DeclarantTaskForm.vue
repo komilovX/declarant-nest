@@ -71,6 +71,15 @@
           />
         </el-form-item>
       </el-col>
+      <el-col :span="12" :md="5" :sm="12">
+        <el-form-item prop="taskText">
+          <el-input
+            v-model="declarantForm.taskText"
+            size="small"
+            placeholder="Заметка"
+          />
+        </el-form-item>
+      </el-col>
       <el-col :span="24" :md="4" :sm="18" class="mb1">
         <el-form-item id="submit-button">
           <app-add-button
@@ -108,6 +117,7 @@ export default {
         documentTypeId: null,
         declarantId: null,
         expire: null,
+        taskText: null,
       },
       rules: {
         documentTypeId: [
@@ -173,5 +183,3 @@ export default {
   },
 }
 </script>
-
-<style></style>

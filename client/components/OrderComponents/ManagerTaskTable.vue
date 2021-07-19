@@ -10,7 +10,7 @@
       <template slot-scope="{ row }">
         <p>Кто дал: {{ row.creator && row.creator.name }}</p>
         <p>Создан: {{ row.createdAt | dateFormatter }}</p>
-        <p>Примечание: {{ row.comment }}</p>
+        <p>Заметка: {{ row.taskText }}</p>
       </template>
     </el-table-column>
     <el-table-column
