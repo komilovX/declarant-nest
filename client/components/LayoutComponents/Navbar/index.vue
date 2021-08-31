@@ -152,8 +152,14 @@ export default Vue.extend({
           }
         })
         matched.forEach((item) => {
-          const route = sidebar.find((s) => s.value === item.name)
-          this.breadcrumb.push({ name: route.name, link: route.link })
+          const route = sidebar.find(
+            (s) =>
+              s.value === item.name ||
+              s.value === (item.parent && item.parent.path.replace('/', ''))
+          )
+          if (route) {
+            this.breadcrumb.push({ name: route.name, link: route.link })
+          }
         })
       }
     },
