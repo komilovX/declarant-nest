@@ -25,6 +25,7 @@
         plain
         icon="el-icon-check"
         :loading="ordersStore.loading"
+        :disabled="updateDisabled"
         @click="updateOrderStatus"
       />
     </div>
@@ -48,6 +49,10 @@ export default {
     orderId: {
       type: Number,
       required: true,
+    },
+    updateDisabled: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {

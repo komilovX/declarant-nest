@@ -35,6 +35,7 @@
           :select="select"
           :status="order.status"
           :order-id="order.id"
+          :updateDisabled="updateDisabled"
         />
       </span>
     </li>
@@ -52,6 +53,10 @@ export default {
       default: () => ({}),
     },
     select: {
+      type: Boolean,
+      default: false,
+    },
+    updateDisabled: {
       type: Boolean,
       default: false,
     },

@@ -14,7 +14,11 @@
             <template slot="title">
               <h3 class="mr1 text-base font-medium">Детали</h3>
             </template>
-            <order-info :order="order" :select="true" />
+            <order-info
+              :order="order"
+              :select="true"
+              :updateDisabled="!decoratedDocuments.length"
+            />
           </el-collapse-item>
         </el-collapse>
       </el-col>
@@ -41,7 +45,7 @@
             <decorated-document
               :decorated-documents="decoratedDocuments"
               :order_id="Number($route.params.id)"
-              @delete-document="deleteDecoratedDocument($event)"
+              @delete-document="deleteDocument($event)"
               @decoratedDocumentAdded="documents.push($event)"
             />
           </el-collapse-item>
