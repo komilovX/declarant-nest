@@ -16,6 +16,7 @@ import { imageFileFilter } from './utils/file-uploading.utils'
 import { AppController } from './app.controller'
 import { NotificationsModule } from './notifications/notifications.module'
 import { StatisticsModule } from './statistics/statistics.module'
+import { EventsModule } from './events/events.module'
 @Module({
   imports: [
     ConfigModule.forRoot(configOptions),
@@ -43,6 +44,7 @@ import { StatisticsModule } from './statistics/statistics.module'
     ContractModule,
     NotificationsModule,
     StatisticsModule,
+    EventsModule,
   ],
   controllers: [AppController],
 })

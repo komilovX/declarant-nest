@@ -1,6 +1,14 @@
 <template>
   <div>
     <el-table :data="decoratedDocuments" size="mini" border>
+      <el-table-column
+        v-if="postNumber"
+        min-width="70"
+        label="Пост номер"
+        align="center"
+      >
+        {{ postNumber }}
+      </el-table-column>
       <el-table-column min-width="70" label="№" align="center">
         <template slot-scope="{ row: { documentType } }">
           {{ documentType.number }}
@@ -130,6 +138,10 @@ export default {
     order_id: {
       type: Number,
       required: true,
+    },
+    postNumber: {
+      type: Number,
+      default: null,
     },
   },
   data() {

@@ -26,6 +26,7 @@ export class NotificationsService {
           userId: user.id,
         },
       )
+      .orderBy('notifications.date', 'DESC')
       .getMany()
   }
 

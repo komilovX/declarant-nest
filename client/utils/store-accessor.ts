@@ -12,6 +12,7 @@ import Orders from '~/store/orders'
 import Documents from '~/store/documents'
 import Notifications from '~/store/notifications'
 import Statistics from '~/store/statistics'
+import Events from '~/store/events'
 
 let authStore: Auth
 let dataStore: Data
@@ -23,6 +24,7 @@ let ordersStore: Orders
 let rolesStore: Roles
 let notificationStore: Notifications
 let statisticsStore: Statistics
+let eventsStore: Events
 let errorStore: Error
 
 function initialiseStores(store: Store<any>): void {
@@ -36,6 +38,7 @@ function initialiseStores(store: Store<any>): void {
   rolesStore = getModule(Roles, store)
   notificationStore = getModule(Notifications, store)
   statisticsStore = getModule(Statistics, store)
+  eventsStore = getModule(Events, store)
   errorStore = getModule(Error, store)
 }
 
@@ -52,4 +55,5 @@ export {
   documentsStore,
   notificationStore,
   statisticsStore,
+  eventsStore,
 }

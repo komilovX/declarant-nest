@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common'
+import { Controller, Get, Query } from '@nestjs/common'
 import { User } from 'src/auth/user.entity'
 import { GetUser } from 'src/common/decorators/get-user.decorator'
 import { StatisticsService } from './statistics.service'
@@ -10,5 +10,10 @@ export class StatisticsController {
   @Get('/')
   findTasksAndOrdersCount(@GetUser() user: User) {
     return this.statisticsService.findTasksAndOrdersCount(user)
+  }
+
+  @Get('/calendar')
+  findForCalendar(@GetUser() user: User, @Query('date') date: string) {
+    return this.statisticsService.findTasksForCalendar(user, date)
   }
 }

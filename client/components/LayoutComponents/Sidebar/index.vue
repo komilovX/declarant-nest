@@ -63,7 +63,7 @@
               <p class="text-2xl font-medium text-white">AHEAD GROUP</p>
               <!-- <img class="h-8 w-48" src="apex_logo.svg" alt="Workflow" /> -->
             </div>
-            <div class="mt-5 flex-1 h-0 overflow-y-auto">
+            <div class="mt-5 flex-1 h-0 overflow-y-auto scrollbar">
               <nav class="space-y-1">
                 <SidebarItems />
               </nav>
@@ -80,7 +80,7 @@
               <logo />
             </nuxt-link>
           </div>
-          <div class="flex-1 flex flex-col overflow-y-auto">
+          <div class="flex-1 flex flex-col overflow-y-auto scrollbar">
             <nav class="flex-1 px-2 py-4 bg-gray-800 space-y-1">
               <SidebarItems />
             </nav>

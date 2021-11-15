@@ -42,7 +42,10 @@
                 Документы оформленные ({{ decoratedDocuments.length }})
               </h3>
             </template>
-            <admin-file-table :documents="decoratedDocuments" />
+            <admin-file-table
+              :postNumber="order.post_number"
+              :documents="decoratedDocuments"
+            />
           </el-collapse-item>
         </el-collapse>
       </el-col>

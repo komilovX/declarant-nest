@@ -26,6 +26,22 @@ class Statistics extends VuexModule {
       throw error
     }
   }
+
+  @Action
+  async findTasksForCalendar(date?: string) {
+    try {
+      this.setLoading(true)
+      if (date) {
+        return await $axios.$get(`/statisitcs/calendar?date=${date}`)
+      } else {
+        return await $axios.$get('/statisitcs/calendar')
+      }
+    } catch (error) {
+      this.setLoading(false)
+      errorStore.setError(error)
+      throw error
+    }
+  }
 }
 
 export default Statistics

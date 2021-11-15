@@ -41,4 +41,36 @@ export class StatisticsService {
     }
     return { tasks, orders }
   }
+
+  async findTasksForCalendar(user: User, dateStr: string) {
+    const date = dateStr ? new Date(dateStr) : new Date(),
+      y = date.getFullYear(),
+      m = date.getMonth()
+    const firstDay = new Date(y, m, 1)
+    const lastDay = new Date(y, m + 1, 0)
+
+    const tasks = await getRepository(Document)
+      .createQueryBuilder('document')
+      .innerJoin('document.declarant', 'declarant', 'declarant.id = :id', {
+        id: user.id,
+      })
+      .innerJoinAndSelect('document.documentType', 'documentType')
+      .innerJoinAndSelect('document.order', 'order')
+      .select('document.id', 'id')
+      .addSelect('document.expire', 'expire')
+      .addSelect('document.status', 'status')
+      .addSelect('documentType.name', 'name')
+      .addSelect('documentType.number', 'number')
+      .addSelect('order.id', 'orderId')
+      .where('document.type = :type', { type: 'declarant' })
+      .andWhere(
+        'document.expire >= :firstDay AND document.expire <= :lastDay',
+        { firstDay, lastDay },
+      )
+      .getRawMany()
+
+    return tasks
+  }
+
+  calculateOrdersBenefitAndCount() {}
 }
