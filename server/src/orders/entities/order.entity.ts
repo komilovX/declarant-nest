@@ -34,6 +34,9 @@ export class Order extends BaseEntity {
   @Column()
   post_number: string
 
+  @Column({ nullable: true })
+  post_date: Date
+
   @Column({ default: OrderStatus.NEW })
   status: string
 

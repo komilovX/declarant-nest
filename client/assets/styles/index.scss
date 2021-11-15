@@ -75,3 +75,27 @@
 .el-drawer__body {
   overflow-y: auto;
 }
+
+.scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+.scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+.scrollbar::-webkit-scrollbar-thumb {
+  background: #888;
+  width: 6px;
+  border-radius: 4px;
+}
+
+/* Handle on hover */
+.scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+.el-divider__text {
+  background-color: #f3f4f6;
+}

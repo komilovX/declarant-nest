@@ -1,4 +1,5 @@
 import { classToPlain, Exclude } from 'class-transformer'
+import { Events } from 'src/events/events.entity'
 import { UserNotification } from 'src/notifications/entities/user-notification.entity'
 import { Order } from 'src/orders/entities/order.entity'
 import { Role } from 'src/roles/entities/role.entity'
@@ -50,6 +51,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[]
+
+  @OneToMany(() => Events, (events) => events.user)
+  events: Events[]
 
   @OneToMany(
     () => UserNotification,

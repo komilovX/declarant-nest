@@ -12,7 +12,7 @@
       </div>
       <el-table :data="products" size="small" border>
         <el-table-column min-width="70" label="#" type="index" align="center" />
-        <app-table-column label="Инфо">
+        <app-table-column label="Наименование" :width="250">
           <template #default="{ index, row }">
             <app-input-row
               :row="row"

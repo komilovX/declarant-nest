@@ -45,6 +45,7 @@
             <decorated-document
               :decorated-documents="decoratedDocuments"
               :order_id="Number($route.params.id)"
+              :postNumber="order.post_number"
               @delete-document="deleteDocument($event)"
               @decoratedDocumentAdded="documents.push($event)"
             />

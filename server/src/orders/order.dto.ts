@@ -30,6 +30,9 @@ export class CreateOrderDto {
   post_number: string
 
   @IsNotEmpty()
+  post_date: Date
+
+  @IsNotEmpty()
   clientId: string
 
   @IsNotEmpty()

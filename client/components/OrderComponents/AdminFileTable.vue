@@ -2,6 +2,14 @@
   <div>
     <h4 v-if="name" class="mb1">{{ name }}</h4>
     <el-table border :data="documents" size="mini">
+      <el-table-column
+        v-if="postNumber"
+        min-width="70"
+        label="Пост номер"
+        align="center"
+      >
+        {{ postNumber }}
+      </el-table-column>
       <el-table-column min-width="70" label="№" align="center">
         <template slot-scope="{ row: { documentType } }">
           {{ documentType && documentType.number }}
@@ -46,6 +54,10 @@ export default {
     name: {
       type: String,
       default: '',
+    },
+    postNumber: {
+      type: Number,
+      default: 0,
     },
   },
 }

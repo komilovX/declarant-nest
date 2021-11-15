@@ -21,7 +21,6 @@ export default {
     '@/plugins/composition-api.ts',
     '@/plugins/axios-accessor.ts',
     '@/plugins/nuxt-client-init.ts',
-    '@/plugins/beautiful-chat',
     '@/utils/directive.ts',
     '@/utils/filters.ts',
   ],

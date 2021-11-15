@@ -30,6 +30,12 @@ export const sidebarItems = [
     value: 'contracts',
   },
   {
+    name: 'Cтатистика',
+    icon: 'el-icon-s-data',
+    link: '/statistics',
+    value: 'statistics',
+  },
+  {
     name: 'Данные',
     icon: 'el-icon-folder-opened',
     group: true,
@@ -127,6 +133,14 @@ export const sidebarRoles = () => [
   {
     name: 'Документы',
     value: 'contracts',
+    create: false,
+    read: true,
+    update: false,
+    delete: false,
+  },
+  {
+    name: 'Cтатистика',
+    value: 'statistics',
     create: false,
     read: true,
     update: false,
