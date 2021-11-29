@@ -1,5 +1,5 @@
 import * as bcrypt from 'bcrypt'
-import { Connection, getCustomRepository } from 'typeorm'
+import { Connection, getCustomRepository, getRepository } from 'typeorm'
 import {
   ConflictException,
   InternalServerErrorException,
@@ -13,6 +13,7 @@ import {
 import { User } from './user.entity'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { RoleRepository } from 'src/roles/role.repository'
+import { Department } from 'src/database/entities/department.entity'
 
 @EntityRepository(User)
 export class AuthRepository extends Repository<User> {
@@ -22,12 +23,21 @@ export class AuthRepository extends Repository<User> {
   private roleRepository = getCustomRepository(RoleRepository)
 
   async signUp(signUpCredentialsDto: SignUpCredentialsDto): Promise<void> {
-    const { name, role, login, password, username } = signUpCredentialsDto
+    const {
+      name,
+      role,
+      login,
+      password,
+      username,
+      departments: departmentsArray,
+    } = signUpCredentialsDto
     const userRole = await this.roleRepository.findOne({ role })
     if (!userRole) {
       throw new NotFoundException(`Role ${role} not found`)
     }
-
+    const departments = await Promise.all(
+      departmentsArray.map((dep) => getRepository(Department).findOne(dep)),
+    )
     const user = new User()
     user.name = name
     user.role = userRole
@@ -35,6 +45,7 @@ export class AuthRepository extends Repository<User> {
     user.username = username
     user.salt = await bcrypt.genSalt()
     user.password = await bcrypt.hash(password, user.salt)
+    user.departments = departments
     try {
       await user.save()
     } catch (e) {
@@ -70,16 +81,25 @@ export class AuthRepository extends Repository<User> {
   }
 
   async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<void> {
-    const { role, password, ...otherData } = updateUserDto
+    const {
+      role,
+      password,
+      departments: departmentsArray,
+      ...otherData
+    } = updateUserDto
     const userRole = await this.roleRepository.findOne({
       role,
     })
     if (!userRole) {
       throw new NotFoundException(`Role ${role} not found`)
     }
+    const departments = await Promise.all(
+      departmentsArray.map((dep) => getRepository(Department).findOne(dep)),
+    )
     const user = await this.preload({
       id,
       role: userRole,
+      departments,
       ...otherData,
     })
     if (!user) {
