@@ -1,9 +1,11 @@
+import { User } from 'src/auth/user.entity'
 import { DocumentType } from 'src/document-type/document-type.entity'
 import {
   BaseEntity,
   Column,
   Entity,
   ManyToMany,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm'
 
@@ -17,4 +19,7 @@ export class Department extends BaseEntity {
 
   @ManyToMany(() => DocumentType, (documentType) => documentType.departments)
   documentTypes: DocumentType[]
+
+  @ManyToOne(() => User, (user) => user.departments)
+  user: User
 }

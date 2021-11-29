@@ -48,12 +48,18 @@ export class AuthService {
         throw new BadRequestException('Invalid user role')
       }
     } else {
-      return this.authRepository.find({ relations: ['role'] })
+      return this.authRepository.find({
+        relations: ['role', 'departments'],
+        order: { id: 'ASC' },
+      })
     }
   }
 
   async getUserById(id: number) {
-    const user = await this.authRepository.findOne({ id })
+    const user = await this.authRepository.findOne(
+      { id },
+      { relations: ['departments'] },
+    )
     if (!user) {
       throw new NotFoundException(`User with #${id} not found`)
     }

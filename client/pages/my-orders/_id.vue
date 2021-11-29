@@ -60,7 +60,8 @@
         </div>
         <declarant-task-form
           :orderId="order.id"
-          :documents="declarantDocumentTypes"
+          :documents="taskDocuments"
+          @onUserChanged="onUserChanged"
           @documentAdded="documents.push($event)"
         />
         <div class="bg-white">
@@ -166,6 +167,7 @@ export default {
       changedDocument: {},
       updateDialog: false,
       contractDialog: false,
+      taskDocuments: [],
     }
   },
   computed: {
@@ -206,6 +208,14 @@ export default {
         this.$message.success('Документ успешна удалена')
         this.documents = this.documents.filter((doc) => doc.id != id)
       } catch (e) {}
+    },
+    onUserChanged(user) {
+      const userDepartments = user.departments.map((d) => d.id)
+      this.taskDocuments = this.declarantDocumentTypes.filter((doc) =>
+        doc.departments
+          .map((d) => d.id)
+          .find((d) => userDepartments.includes(d))
+      )
     },
   },
 }

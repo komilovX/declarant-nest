@@ -32,6 +32,23 @@
             <el-form-item label="Логин" prop="login">
               <el-input v-model="employerForm.login" size="small" type="text" />
             </el-form-item>
+            <el-form-item label="Отдель" prop="departments">
+              <el-select
+                v-model="employerForm.departments"
+                multiple
+                placeholder="Отдель"
+                size="small"
+                style="width: 100%"
+              >
+                <el-option
+                  v-for="item in dataStore.departments"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                >
+                </el-option>
+              </el-select>
+            </el-form-item>
             <el-form-item label="Роль" prop="role" class="mb2">
               <el-select v-model="employerForm.role" size="small">
                 <el-option
@@ -66,7 +83,7 @@
   </div>
 </template>
 <script>
-import { rolesStore, userStore } from '~/store'
+import { dataStore, rolesStore, userStore } from '~/store'
 import { mapRulesByValue } from '~/utils/form-rules'
 export default {
   middleware: ['admin-auth'],
@@ -74,6 +91,7 @@ export default {
     return {
       rolesStore,
       userStore,
+      dataStore,
       employerForm: {
         name: '',
         login: '',
@@ -90,6 +108,7 @@ export default {
       if (!rolesStore.roles.length) {
         await rolesStore.fetchRoles()
       }
+      await dataStore.fetchDepartments()
       await userStore.findUserById(+this.$route.params.id)
       this.setUser()
     } catch (error) {}
@@ -103,6 +122,7 @@ export default {
             login: this.employerForm.login,
             role: this.employerForm.role,
             username: this.employerForm.username,
+            departments: this.employerForm.departments,
           }
           if (this.employerForm.password) {
             formData.password = this.employerForm.password
@@ -121,10 +141,12 @@ export default {
     },
     setUser() {
       if (userStore.user) {
-        const { name, username, login, role } = userStore.user
+        const { name, username, login, role, departments = [] } = userStore.user
+
         this.employerForm.name = name
         this.employerForm.username = username
         this.employerForm.login = login
+        this.employerForm.departments = departments
         this.employerForm.role = role?.role
       }
     },

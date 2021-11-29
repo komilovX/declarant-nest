@@ -39,8 +39,30 @@
                 type="password"
               />
             </el-form-item>
+            <el-form-item label="Отдель" prop="departments">
+              <el-select
+                v-model="employerForm.departments"
+                multiple
+                placeholder="Отдель"
+                size="small"
+                style="width: 100%"
+              >
+                <el-option
+                  v-for="item in dataStore.departments"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                >
+                </el-option>
+              </el-select>
+            </el-form-item>
             <el-form-item label="Роль" prop="role" class="mb2">
-              <el-select v-model="employerForm.role" size="small">
+              <el-select
+                v-model="employerForm.role"
+                placeholder="Роль"
+                size="small"
+                style="width: 100%"
+              >
                 <el-option
                   v-for="s in rolesStore.roles"
                   :key="s.role"
@@ -49,6 +71,7 @@
                 />
               </el-select>
             </el-form-item>
+
             <el-form-item id="submit-button">
               <el-button
                 type="success"
@@ -67,7 +90,7 @@
 </template>
 <script>
 import accessForm from '@/mixins/accessForm'
-import { userStore, rolesStore } from '~/store'
+import { userStore, rolesStore, dataStore } from '~/store'
 
 export default {
   mixins: [accessForm],
@@ -75,6 +98,7 @@ export default {
     return {
       userStore,
       rolesStore,
+      dataStore,
     }
   },
   async fetch() {
@@ -82,6 +106,7 @@ export default {
       if (!rolesStore.roles.length) {
         await rolesStore.fetchRoles()
       }
+      await dataStore.fetchDepartments()
     } catch (error) {}
   },
   methods: {
@@ -94,6 +119,7 @@ export default {
             password: this.employerForm.password,
             role: this.employerForm.role,
             username: this.employerForm.username,
+            departments: this.employerForm.departments,
           }
           try {
             await this.userStore.addUser(formData)

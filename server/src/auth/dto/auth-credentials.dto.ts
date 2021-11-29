@@ -1,4 +1,10 @@
-import { IsString, Matches, MaxLength, MinLength } from 'class-validator'
+import {
+  IsArray,
+  IsString,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator'
 
 export class SignUpCredentialsDto {
   @IsString()
@@ -19,6 +25,9 @@ export class SignUpCredentialsDto {
     message: 'Пароль слишком слабый',
   })
   password: string
+
+  @IsArray()
+  departments: number[]
 
   @IsString()
   role: string

@@ -140,7 +140,7 @@ export default {
       required: true,
     },
     postNumber: {
-      type: Number,
+      type: String,
       default: null,
     },
   },

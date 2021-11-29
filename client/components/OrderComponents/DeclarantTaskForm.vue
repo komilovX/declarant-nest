@@ -6,6 +6,24 @@
     :rules="rules"
   >
     <el-row :gutter="15">
+      <el-col :span="24" :md="4" :sm="24">
+        <el-form-item prop="declarantId">
+          <el-select
+            v-model="declarantForm.declarantId"
+            size="small"
+            filterable
+            placeholder="Исполнитель"
+            @change="onUserChanged"
+          >
+            <el-option
+              v-for="s in userStore.users"
+              :key="s.id"
+              :label="s.name"
+              :value="s.id"
+            />
+          </el-select>
+        </el-form-item>
+      </el-col>
       <el-col :span="24" :md="3" :sm="18">
         <el-form-item prop="documentTypeId">
           <el-select
@@ -40,23 +58,6 @@
               :key="c.id"
               :label="c.name"
               :value="c.id"
-            />
-          </el-select>
-        </el-form-item>
-      </el-col>
-      <el-col :span="24" :md="4" :sm="24">
-        <el-form-item prop="declarantId">
-          <el-select
-            v-model="declarantForm.declarantId"
-            size="small"
-            filterable
-            placeholder="Исполнитель"
-          >
-            <el-option
-              v-for="s in userStore.users"
-              :key="s.id"
-              :label="s.name"
-              :value="s.id"
             />
           </el-select>
         </el-form-item>
@@ -179,6 +180,10 @@ export default {
           }
         }
       })
+    },
+    onUserChanged(id) {
+      const user = userStore.users.find((u) => u.id == id)
+      this.$emit('onUserChanged', user)
     },
   },
 }

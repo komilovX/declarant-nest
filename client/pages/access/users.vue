@@ -35,7 +35,7 @@
           show-overflow-tooltip
         />
         <el-table-column
-          width="250"
+          width="200"
           prop="login"
           label="Логин"
           show-overflow-tooltip
@@ -46,13 +46,30 @@
           "
           :filter-method="filterRole"
           filter-placement="bottom-end"
-          width="400"
+          show-overflow-tooltip
+          max-width="300"
+          min-width="200"
           label="Должность"
         >
           <template slot-scope="{ row: { role } }">
-            <el-tag type="primary" effect="plain" size="small">
-              {{ role.name }}
-            </el-tag>
+            <p class="text-blue-500">{{ role.name }}</p>
+          </template>
+        </el-table-column>
+        <el-table-column
+          show-overflow-tooltip
+          min-width="200"
+          label="Отдель"
+          align="center"
+        >
+          <template slot-scope="{ row: { departments } }">
+            <div>
+              <span
+                v-for="d of departments"
+                :key="d.id"
+                class="text-green-500 mr-2"
+                >{{ d.name }}</span
+              >
+            </div>
           </template>
         </el-table-column>
         <el-table-column>

@@ -17,8 +17,16 @@ export default {
         comment: '',
         role: '',
         username: '',
+        departments: [],
       },
-      rules: mapRulesByValue(['name', 'login', 'username', 'password', 'role']),
+      rules: mapRulesByValue([
+        'name',
+        'login',
+        'username',
+        'password',
+        'role',
+        'departments',
+      ]),
     }
   },
 }
