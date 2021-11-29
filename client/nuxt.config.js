@@ -2,7 +2,7 @@ export default {
   ssr: false,
   server: {
     port: 3000,
-    // host: "207.154.223.158"
+    host: '207.154.223.158',
   },
   head: {
     title: 'client',
@@ -32,7 +32,7 @@ export default {
   modules: ['@nuxtjs/axios', '@nuxtjs/pwa'],
 
   axios: {
-    baseURL: 'http://localhost:8080',
+    baseURL: 'http://207.154.223.158:8080',
   },
 
   pwa: {
