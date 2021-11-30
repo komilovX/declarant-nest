@@ -4,24 +4,22 @@
     <el-table border :data="documents" size="mini">
       <el-table-column
         v-if="postNumber"
-        min-width="70"
-        label="Пост номер"
+        label="Справочный номер"
         align="center"
+        style="font-size: 10px"
       >
-        {{ postNumber }}
-      </el-table-column>
-      <el-table-column min-width="70" label="№" align="center">
-        <template slot-scope="{ row: { documentType } }">
-          {{ documentType && documentType.number }}
+        <template slot-scope="{ row: { postDate, referenceNumber } }">
+          {{ postNumber }}/{{ postDate | dateFormatter
+          }}{{ referenceNumber && `/${referenceNumber}` }}
         </template>
       </el-table-column>
-      <el-table-column min-width="80" label="Наименование" align="center">
+      <el-table-column min-width="70" label="Документ" align="center">
         <template slot-scope="{ row: { documentType } }">
-          {{ documentType && documentType.name }}
+          {{ documentType.name }}
         </template>
       </el-table-column>
       <el-table-column
-        min-width="100"
+        min-width="70"
         label="Файл"
         align="center"
         class="flex content-center"

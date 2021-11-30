@@ -76,6 +76,7 @@
                   v-else
                   size="small"
                   type="text"
+                  class="mt-2"
                   @click="changePriceInputStatus($index)"
                 >
                   Добавить
@@ -101,7 +102,7 @@
               </template>
             </el-table-column>
           </el-table>
-          <app-add-button class="mt-2" @on-click="visibleDialog = true" />
+          <app-add-button class="mt-4" @on-click="visibleDialog = true" />
         </el-col>
       </el-row>
       <el-row :gutter="20">
@@ -115,32 +116,11 @@
           label-position="top"
         >
           <el-col :span="12" :md="5" :sm="12">
-            <el-form-item label="Дата" prop="date">
-              <el-date-picker
-                v-model="ordersForm.date"
-                size="small"
-                disabled
-                type="date"
-                placeholder="Pick a day"
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12" :md="5" :sm="12">
             <el-form-item label="Пост номер" prop="post_number">
               <el-input
                 v-model="ordersForm.post_number"
                 size="small"
                 type="text"
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12" :md="5" :sm="12">
-            <el-form-item label="Пост дата " prop="post_date">
-              <el-date-picker
-                v-model="ordersForm.post_date"
-                size="small"
-                type="date"
-                placeholder="Pick a day"
               />
             </el-form-item>
           </el-col>
@@ -209,6 +189,7 @@
               </el-select>
             </el-form-item>
           </el-col>
+          <el-col></el-col>
           <el-col :span="12" :md="5" :sm="12">
             <el-form-item label="Грузоотправитель" prop="shipperId">
               <div class="flex">
@@ -216,7 +197,7 @@
                   v-model="ordersForm.shipperId"
                   filterable
                   size="small"
-                  class="w-full mr-2"
+                  class="mr-2"
                   placeholder="Грузоотправитель"
                 >
                   <el-option
@@ -245,53 +226,51 @@
               />
             </el-form-item>
           </el-col>
-          <el-col>
-            <el-col :span="12" :md="5" :sm="12" style="padding-left: 0">
-              <el-form-item label="Название товара" prop="productId">
-                <div class="flex">
-                  <el-select
-                    v-model="ordersForm.productId"
-                    filterable
-                    size="small"
-                    class="w-full mr-2"
-                    placeholder="Название товара"
-                  >
-                    <el-option
-                      v-for="(c, index) in dataStore.products"
-                      :key="index"
-                      :label="c.name"
-                      :value="c.id"
-                    />
-                  </el-select>
-                  <el-button
-                    size="mini"
-                    icon="el-icon-circle-plus"
-                    class="fs-icon text-lg"
-                    type="text"
-                    @click="productDialogVisible = true"
-                  />
-                </div>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12" :md="5" :sm="12">
-              <el-form-item prop="declarantId" label="Исполнитель">
+          <el-col :span="12" :md="5" :sm="12">
+            <el-form-item label="Название товара" prop="productId">
+              <div class="flex">
                 <el-select
-                  v-model="ordersForm.declarantId"
+                  v-model="ordersForm.productId"
                   filterable
                   size="small"
                   class="w-full mr-2"
+                  placeholder="Название товара"
                 >
                   <el-option
-                    v-for="s in userStore.users"
-                    :key="s.id"
-                    :label="s.name"
-                    :value="s.id"
+                    v-for="(c, index) in dataStore.products"
+                    :key="index"
+                    :label="c.name"
+                    :value="c.id"
                   />
                 </el-select>
-              </el-form-item>
-            </el-col>
+                <el-button
+                  size="mini"
+                  icon="el-icon-circle-plus"
+                  class="fs-icon text-lg"
+                  type="text"
+                  @click="productDialogVisible = true"
+                />
+              </div>
+            </el-form-item>
           </el-col>
-          <el-col>
+          <el-col :span="12" :md="5" :sm="12" style="padding-left: 0">
+            <el-form-item prop="declarantId" label="Исполнитель">
+              <el-select
+                v-model="ordersForm.declarantId"
+                filterable
+                size="small"
+                class="w-full"
+              >
+                <el-option
+                  v-for="s in userStore.users"
+                  :key="s.id"
+                  :label="s.name"
+                  :value="s.id"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col class="mt-2">
             <el-form-item id="submit-button">
               <el-button
                 size="small"
@@ -399,7 +378,6 @@ export default {
       shipperId: '',
       productId: '',
       post_number: '',
-      post_date: new Date(),
       declarantId: '',
     },
     rules: mapRulesByValue([
@@ -410,7 +388,6 @@ export default {
       'clientDirectorId',
       'declarantId',
       'post_number',
-      'post_date',
       'shipperId',
     ]),
   }),

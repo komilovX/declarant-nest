@@ -140,7 +140,7 @@ export default {
       fileList: [],
       incomingForm: {
         documentTypeId: null,
-        order: null,
+        order: '',
         price: '',
         currency: '',
       },
@@ -152,6 +152,7 @@ export default {
       this.$refs[formName].validate(async (valid) => {
         if (valid) {
           try {
+            this.loading = true
             const { documentTypeId, price, order, currency } = this[formName]
             const fd = new FormData()
             fd.append('documentTypeId', documentTypeId)
@@ -171,8 +172,10 @@ export default {
               : [{ price: '', currency: '' }]
             this.$emit('documentAdded', document)
             this.$message.success('Документ успешно добовлен')
+            this.fileList = []
             this.$refs.incomingForm.resetFields()
             this.$refs.decoratedUpload.clearFiles()
+            this.loading = false
           } catch (error) {
             this.loading = false
             console.log(error)
@@ -185,6 +188,7 @@ export default {
       const idx = type.search(/png|jpeg|docx|doc|pdf/)
       if (idx == -1) {
         this.$message.error('файлы толка с расширением png|jpeg|docx|doc|pdf ')
+        this.$refs.decoratedUpload.clearFiles()
         return
       }
       this.fileList.push(file)

@@ -10,7 +10,7 @@
       {{ statuses[status] }}
     </el-tag>
     <div v-else class="df">
-      <el-select v-model="orderStatus" size="small" class="mr1">
+      <el-select v-model="orderStatus" size="small" class="mr-2">
         <el-option
           v-for="s in Object.keys(statuses)"
           :key="s"
