@@ -63,6 +63,12 @@ export class Document extends BaseEntity {
   expire: Date
 
   @Column({ nullable: true })
+  postDate: Date
+
+  @Column({ nullable: true })
+  referenceNumber: number
+
+  @Column({ nullable: true })
   returnText: string
 
   @Column({ nullable: true })

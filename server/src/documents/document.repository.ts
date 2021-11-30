@@ -37,6 +37,7 @@ export class DocumentRepository extends Repository<Document> {
     } = createDocumentDto
 
     let declarant = null
+
     const order = await this.orderRepository.findOne(orderId)
     const documentType = await this.documentTypeRepository.findOne(
       documentTypeId,

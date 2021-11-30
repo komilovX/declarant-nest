@@ -14,7 +14,6 @@ export interface PriceI {
 
 export class CreateDocumentDto {
   @IsNotEmpty()
-  @IsString()
   orderId: string
 
   declarantId?: string
@@ -36,6 +35,12 @@ export class CreateDocumentDto {
 
   @IsOptional()
   comment?: string
+
+  @IsOptional()
+  postDate?: Date
+
+  @IsOptional()
+  referenceNumber?: string
 }
 
 export class GiveTaskDocumentDto {
