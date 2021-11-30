@@ -9,6 +9,8 @@ import {
   Column,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -56,7 +58,8 @@ export class User extends BaseEntity {
   @OneToMany(() => Events, (events) => events.user)
   events: Events[]
 
-  @OneToMany(() => Department, (department) => department.user)
+  @JoinTable()
+  @ManyToMany(() => Department, (department) => department.users)
   departments: Department[]
 
   @OneToMany(

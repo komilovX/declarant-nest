@@ -5,7 +5,6 @@ import {
   Column,
   Entity,
   ManyToMany,
-  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm'
 
@@ -20,6 +19,6 @@ export class Department extends BaseEntity {
   @ManyToMany(() => DocumentType, (documentType) => documentType.departments)
   documentTypes: DocumentType[]
 
-  @ManyToOne(() => User, (user) => user.departments)
-  user: User
+  @ManyToMany(() => User, (user) => user.departments)
+  users: User[]
 }
