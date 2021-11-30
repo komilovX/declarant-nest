@@ -39,11 +39,11 @@
                 type="password"
               />
             </el-form-item>
-            <el-form-item label="Отдель" prop="departments">
+            <el-form-item label="Отдел" prop="departments">
               <el-select
                 v-model="employerForm.departments"
                 multiple
-                placeholder="Отдель"
+                placeholder="Отдел"
                 size="small"
                 style="width: 100%"
               >

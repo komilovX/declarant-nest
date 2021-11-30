@@ -34,6 +34,11 @@ class Users extends VuexModule {
     this.user = user
   }
 
+  @Mutation
+  removeUser(id: number) {
+    this.users = this.users.filter((u: any) => u.id !== id)
+  }
+
   @Action({ rawError: true })
   async findUserById(id: number) {
     try {
@@ -80,6 +85,20 @@ class Users extends VuexModule {
     try {
       this.setLoading(true)
       await $axios.$put(`/auth/user/${id}`, formData)
+      this.setLoading(false)
+    } catch (error) {
+      this.setLoading(false)
+      errorStore.setError(error)
+      throw error
+    }
+  }
+
+  @Action({ rawError: true })
+  async deleteUser(id: number) {
+    try {
+      this.setLoading(true)
+      await $axios.$delete(`/auth/user/${id}`)
+      this.removeUser(id)
       this.setLoading(false)
     } catch (error) {
       this.setLoading(false)

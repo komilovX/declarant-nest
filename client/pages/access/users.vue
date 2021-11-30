@@ -1,21 +1,25 @@
 <template>
   <div>
-    <div class="flex items-center">
-      <h2 class="mr-2 text-lg font-medium">Пользователи</h2>
-      <app-add-button
-        v-role:create="'access-users'"
-        @on-click="$router.push('/access/add-user')"
-      />
+    <div class="flex items-center justify-between">
+      <div class="flex items-center">
+        <h2 class="mr-2 text-lg font-medium">Пользователи</h2>
+        <app-add-button
+          v-role:create="'access-users'"
+          @on-click="$router.push('/access/add-user')"
+        />
+      </div>
+      <div>
+        <el-input
+          v-model="search"
+          placeholder="Быстрый поиск"
+          prefix-icon="el-icon-search"
+          size="small"
+          class="md:w-72 w-1/3"
+        />
+      </div>
     </div>
     <hr class="my-2" />
     <div>
-      <el-input
-        v-model="search"
-        placeholder="Быстрый поиск"
-        prefix-icon="el-icon-search"
-        size="small"
-        class="w-1/3 mb-2"
-      />
       <el-table
         v-loading="userStore.loading"
         :data="
@@ -58,7 +62,7 @@
         <el-table-column
           show-overflow-tooltip
           min-width="200"
-          label="Отдель"
+          label="Отдел"
           align="center"
         >
           <template slot-scope="{ row: { departments } }">
@@ -134,7 +138,7 @@ export default {
       })
         .then(async () => {
           try {
-            await this.$store.dispatch('auth/deleteById', id)
+            await userStore.deleteUser(id)
             this.adminList = this.adminList.filter((t) => t.id != id)
             this.$message.success('Поставщик удалена')
           } catch (e) {

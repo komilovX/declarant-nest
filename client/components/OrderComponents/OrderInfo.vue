@@ -13,10 +13,6 @@
       <span class="value">{{ order.post_number }}</span>
     </li>
     <li>
-      <span class="name text-base font-medium">Пост дата:</span>
-      <span class="value">{{ order.post_date | dateFormatter }}</span>
-    </li>
-    <li>
       <span class="name text-base font-medium">Грузоотправитель:</span>
       <span class="value">{{ order.shipper && order.shipper.name }}</span>
     </li>

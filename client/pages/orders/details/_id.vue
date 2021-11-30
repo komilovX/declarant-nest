@@ -42,7 +42,7 @@
                 Документы оформленные ({{ decoratedDocuments.length }})
               </h3>
             </template>
-            <admin-file-table
+            <admin-decorated-document-table
               :postNumber="order.post_number"
               :documents="decoratedDocuments"
             />
@@ -160,6 +160,7 @@ import OrderTaskStatuses from '~/components/OrderComponents/OrderTaskStatuses.vu
 import AdminPersonalTable from '~/components/OrderComponents/AdminPersonalTable.vue'
 import OrderContracts from '~/components/OrderComponents/OrderContracts.vue'
 import { DocumentStatus } from '~/utils/data'
+import AdminDecoratedDocumentTable from '~/components/OrderComponents/AdminDecoratedDocumentTable.vue'
 
 export default {
   components: {
@@ -173,6 +174,7 @@ export default {
     OrderTaskStatuses,
     AdminPersonalTable,
     OrderContracts,
+    AdminDecoratedDocumentTable,
   },
   beforeRouteLeave(_to, _from, next) {
     if (this.serviceList.length > 0) {

@@ -3,23 +3,21 @@
     <el-table :data="decoratedDocuments" size="mini" border>
       <el-table-column
         v-if="postNumber"
-        min-width="70"
-        label="Пост номер"
+        label="Справочный номер"
         align="center"
+        style="font-size: 10px"
       >
-        {{ postNumber }}
-      </el-table-column>
-      <el-table-column min-width="70" label="№" align="center">
-        <template slot-scope="{ row: { documentType } }">
-          {{ documentType.number }}
+        <template slot-scope="{ row: { postDate, referenceNumber } }">
+          {{ postNumber }}/{{ postDate | dateFormatter
+          }}{{ referenceNumber && `/${referenceNumber}` }}
         </template>
       </el-table-column>
-      <el-table-column min-width="80" label="Наименование" align="center">
+      <el-table-column min-width="70" label="Документ" align="center">
         <template slot-scope="{ row: { documentType } }">
           {{ documentType.name }}
         </template>
       </el-table-column>
-      <el-table-column min-width="120" label="Файл" align="center">
+      <el-table-column min-width="70" label="Файл" align="center">
         <template
           slot-scope="{ row: { files }, row }"
           class="flex justify-center"
@@ -64,62 +62,81 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-form ref="decoratedForm" :model="decoratedForm" :rules="rules">
-      <el-row :gutter="15" class="flex justify-center px-2 py-3">
-        <el-col :span="24" :md="6" :sm="6" :xs="12">
-          <el-form-item prop="id">
-            <el-select
-              v-model="decoratedForm.id"
-              size="mini"
-              filterable
-              class="width90"
-              placeholder="Номер"
-              @change="(val) => onSelectChange(val, 'decoratedForm')"
-            >
-              <el-option
-                v-for="c in documents"
-                :key="c.id"
-                :label="c.number"
-                :value="c.id"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="24" :md="8" :sm="8" :xs="12">
-          <el-form-item prop="number">
-            <el-input
-              v-model="decoratedForm.name"
-              placeholder="Наименование"
-              size="mini"
-              :disabled="true"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="24" :md="5" :sm="4">
-          <el-form-item>
-            <el-upload
-              ref="decoratedUpload"
-              action="https://localhost:3000"
-              :auto-upload="false"
-              :on-change="handleFileChange"
-              :on-remove="handleFileRemove"
-            >
-              <el-button size="mini" plain type="primary"
-                >Загрузить файл</el-button
+    <div class="px-2 py-1">
+      <el-button type="text" @click="visible = true">Добавить</el-button>
+    </div>
+    <el-dialog
+      custom-class="w-11/12 md:w-3/5"
+      title="Добавление документ"
+      :visible.sync="visible"
+      :before-close="() => (visible = false)"
+    >
+      <el-row :gutter="15">
+        <el-form ref="decoratedForm" :model="decoratedForm" :rules="rules">
+          <el-col :span="24" :md="6" :sm="6" :xs="12">
+            <el-form-item prop="id">
+              <el-select
+                v-model="decoratedForm.id"
+                size="mini"
+                filterable
+                class="width90"
+                placeholder="Документ"
               >
-            </el-upload>
-          </el-form-item>
-        </el-col>
-        <el-col :span="24" :md="5" :sm="5">
-          <el-form-item id="submit-button">
-            <app-add-button
-              :loading="loading"
-              @on-click="submitForm('decoratedForm')"
-            />
-          </el-form-item>
-        </el-col>
+                <el-option
+                  v-for="c in documents"
+                  :key="c.id"
+                  :label="c.name"
+                  :value="c.id"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12" :md="6" :sm="12">
+            <el-form-item prop="postDate">
+              <el-date-picker
+                v-model="decoratedForm.postDate"
+                size="small"
+                style="max-width: 100%"
+                placeholder="Пост дата"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="24" :md="6" :sm="24">
+            <el-form-item prop="order">
+              <el-input
+                v-model="decoratedForm.referenceNumber"
+                placeholder="Справочный номер"
+                size="small"
+                type="text"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="24" :md="6" :sm="4">
+            <el-form-item>
+              <el-upload
+                ref="decoratedUpload"
+                action="https://localhost:3000"
+                :auto-upload="false"
+                :on-change="handleFileChange"
+                :on-remove="handleFileRemove"
+              >
+                <el-button size="mini" plain type="primary"
+                  >Загрузить файл</el-button
+                >
+              </el-upload>
+            </el-form-item>
+          </el-col>
+          <el-col>
+            <el-form-item id="submit-button">
+              <app-add-button
+                :loading="loading"
+                @on-click="submitForm('decoratedForm')"
+              />
+            </el-form-item>
+          </el-col>
+        </el-form>
       </el-row>
-    </el-form>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -150,9 +167,12 @@ export default {
       documentsStore,
       loading: false,
       fileList: [],
+      visible: false,
       decoratedForm: {
         id: '',
         name: '',
+        postDate: '',
+        referenceNumber: '',
       },
       rules: {
         id: [
@@ -186,6 +206,7 @@ export default {
       const idx = type.search(/png|jpeg|docx|doc|pdf/)
       if (idx == -1) {
         this.$message.error('Файлы толка с расширением png|jpeg|docx|doc|pdf ')
+        this.$refs.decoratedUpload.clearFiles()
         return
       }
       this.fileList.push(file)
@@ -193,26 +214,25 @@ export default {
     handleFileRemove(file) {
       this.fileList = this.fileList.filter(({ uid }) => uid !== file.uid)
     },
-    onSelectChange(val, formName) {
-      const document = this.documents.find((d) => d.id == val)
-      if (document) {
-        this[formName].name = document.name
-      }
-    },
     submitForm(formName) {
       this.$refs[formName].validate(async (valid) => {
         if (valid && this.fileList.length) {
           try {
-            const { id } = this[formName]
+            const { id, postDate, referenceNumber } = this[formName]
+
             const fd = new FormData()
             fd.append('documentTypeId', id)
             fd.append('orderId', this.order_id)
+            postDate && fd.append('postDate', postDate)
+            referenceNumber && fd.append('referenceNumber', referenceNumber)
             fd.append('type', DocumenTypes.DECORATED)
             this.fileList.forEach((file) =>
               fd.append('files', file.raw, file.name)
             )
+
             const document = await documentsStore.createDocument(fd)
             this.$emit('decoratedDocumentAdded', document)
+
             this.$message.success('Документ успешно добовлен')
             this.$refs.decoratedUpload.clearFiles()
             clearForm.bind(this)(formName)
